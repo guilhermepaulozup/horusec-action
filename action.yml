@@ -2,13 +2,10 @@ name: "Horusec"
 description: "Secure Code Analysis."
 
 inputs:
-  # github-token:
-  #   required: true
-  #   default: ${{ github.token }}
-  horusec-version:
+  horusec_version:
     required: false
     default: "v2.8.0"
-  project-path:
+  project_path:
     required: false
     type: string
     default: "."
@@ -16,7 +13,7 @@ inputs:
     required: false
     type: string
     default: null
-  config-file-path:
+  config_file_path:
     required: false
     type: string
     default: null

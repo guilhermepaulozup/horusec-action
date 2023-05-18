@@ -3,8 +3,8 @@
 const core = require('@actions/core');
 const flags = [
     "ignore",
-    "project-path",
-    "config-file-path"
+    "project_path",
+    "config_file_path",
 ]
 
 module.exports = class Flags {
