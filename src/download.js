@@ -4,12 +4,19 @@ const core = require('@actions/core');
 const tc = require("@actions/tool-cache");
 const gh = require("@actions/github");
 
+const getRequiredVersion = ( {assets} ) => {
+    const asset = assets
+        .find(({ name }) => name.includes(`${platform}_${arch}`));
+    if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arch}`); }
+    return asset.browser_download_url;
+}
+
 /**
-    Parses the container OS.
+    Retr.
     @param {string} version The version of the binary to download.
     @returns {string} The binary download url.
 */
-const getVersion = async (version = "latest") => {
+const getReleases = async (version = "latest") => {
     const octokit = gh.getOctokit(core.getInput('github-token'));
     const fullName = {
         owner: "ZupIT",
@@ -30,13 +37,7 @@ const getVersion = async (version = "latest") => {
     }
     const platform = "linux"
     const arch = "x86"
-    core.info(`${platform}_${arch}`);
-    const asset = data
-        .assets
-        .find(({ name }) => name.includes(`${platform}_${arch}`));
-    if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arch}`); }
-
-    return asset.browser_download_url;
+    return data;
 }
 
 /**
@@ -45,7 +46,8 @@ const getVersion = async (version = "latest") => {
 module.exports = async function () {
     const version = core.getInput("horusec-version");
     core.debug("Testing..");
-    const horusecUrl = await getVersion(version);
+    const data = await getReleases(version);
+    const horusecUrl = getRequiredVersion(data);
     core.debug(horusecUrl);
     const horusecPath = await tc.downloadTool(horusecUrl);
     // gives binary permission to execute.
