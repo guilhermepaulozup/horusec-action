@@ -13443,7 +13443,7 @@ const gh = __nccwpck_require__(5438);
     @returns {string} The binary download url.
 */
 const getVersion = async (version = "latest") => {
-    const octokit = gh.getOctokit(process.env.GITHUB_TOKEN);
+    const octokit = gh.getOctokit(core.getInput('github-token'));
 
     const { data } = await octokit.rest.repos.getReleaseByTag(
         { owner: "ZupIT", repo: "horusec", tag: version }
@@ -13462,8 +13462,8 @@ const getVersion = async (version = "latest") => {
 */
 module.exports = async function () {
     const version = core.getInput("horusec-version");
+    core.info("Testing..");
     const horusecUrl = getVersion(version);
-
     const horusecPath = await tc.downloadTool(horusecUrl);
     // gives binary permission to execute.
     fs.chmodSync(horusecPath, 0o755);

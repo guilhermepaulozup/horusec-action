@@ -3,11 +3,16 @@ description: "Secure Code Analysis."
 
 inputs:
   # Horusec Action specific inputs.
+  github-token:
+    description: The github token to use in the action.
+    required: true
+    default: null
+    
   horusec-version:
     description: The required Horusec CLI version to use. Default to latest.
     required: false
     default: latest
-
+  
   # Horusec CLI inputs.
   analysis-timeout:
     description: The timeout threshold for the Horusec CLI wait for the analysis to complete. The minimum time is 10 (default 600).
@@ -52,6 +57,10 @@ inputs:
     required: false
     type: string
     default: "."
+  return-error:
+    description: If the execution should return Error if vulnerabilities are found.
+    required: false
+    default: false
      
 runs:
   using: 'node16'
