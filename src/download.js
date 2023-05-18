@@ -18,7 +18,7 @@ module.exports = async function () {
     const version = core.getInput("horusec-version");
     const osVersion = getVersion();
     // TODO: Needs to request the Get Release.
-    const url = `https://github.com/ZupIT/horusec/releases/download/v.2.8.0/${osVersion}`;
+    const url = `https://github.com/ZupIT/horusec/releases/download/v2.8.0/${osVersion}`;
 
     // downloads the binary into the temp directory.
     const horusecPath = await tc.downloadTool(url);
