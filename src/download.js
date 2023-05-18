@@ -4,6 +4,10 @@ const core = require('@actions/core');
 const tc = require("@actions/tool-cache");
 const gh = require("@actions/github");
 
+/* 
+    TODO: Currently fetching the required version by this code
+            isnt working. Probably should use another method than Platform and arch.
+*/
 const getRequiredVersion = ( {assets} ) => {
     const asset = assets
         .find(({ name }) => name.includes(`${platform}_${arch}`));
