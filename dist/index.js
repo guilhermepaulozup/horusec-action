@@ -6541,7 +6541,8 @@ const getVersion = () => {
 module.exports = async function () {
     const version = core.getInput("horusec-version");
     const osVersion = getVersion();
-    const url = `https://github.com/ZupIT/horusec/releases/download/${version}/${osVersion}`;
+    // TODO: Needs to request the Get Release.
+    const url = `https://github.com/ZupIT/horusec/releases/download/v.2.8.0/${osVersion}`;
 
     // downloads the binary into the temp directory.
     const horusecPath = await tc.downloadTool(url);
@@ -6768,7 +6769,7 @@ const download = __nccwpck_require__(7129);
 async function run() {
     // grabs all action inputs.
     core.info("Getting action inputs.");
-
+    // TODO: Needs to download the Horusec binary based on version and using the REST API.
     // downloads the horusec binary.
     core.info("Downloading required Horusec binary.")
     const executable = await download();

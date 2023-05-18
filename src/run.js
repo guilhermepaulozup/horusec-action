@@ -9,7 +9,7 @@ const download = require("./download");
 async function run() {
     // grabs all action inputs.
     core.info("Getting action inputs.");
-
+    // TODO: Needs to download the Horusec binary based on version and using the REST API.
     // downloads the horusec binary.
     core.info("Downloading required Horusec binary.")
     const executable = await download();
