@@ -1,43 +1,25 @@
-const core = require('@actions/core');
-const {promisify} = require('util');
+const { spawn } = require("child_process");
+const core = require("@actions/core");
+const exec = require("@actions/exec");
+const Flags = require("./flags");
+const download = require("./download");
 
-const fs = require('fs');
-const subprocesses = require('child_process');
-const exec = promisify(subprocesses.exec)
-const exists = promisify(fs.exists)
-const read = promisify(fs.readFile)
-
-const download = require('./download');
-const reviewdog = require('./reviewdog');
-const Flags = require('./flags');
 
 async function run() {
-    const executable = await download()
-    const flags = new Flags()
-    const output = './result.json'
+    // grabs all action inputs.
+    core.info("Getting action inputs.");
+    const fl = new Flags();
+    core.info("Downloading required Horusec binary.")
+    core.info(fl);
+    const executable = await download();
+    core.info("Executing Horusec...");
     try {
-        await exec(`${executable} start ${flags} --json-output-file="${output}" --output-format="json"`)
+        await exec.exec(executable, ["start", "-p", ".", "-O", "./report.json", "-o", "json"]);
     } catch (err) {
-        core.setFailed(err.message)
+        core.setFailed(err.message);
     }
+    core.info("Horusec finished the analysis in your code..");
+};
 
-    if (await exists(output)) {
-        const raw = await read(output);
-        const result = JSON.parse(raw);
-        const {analysisVulnerabilities: analysis} = result
-        if (analysis) {
-            core.group('vulnerabilities', function () {
-                analysis.map(({vulnerabilities}) => vulnerabilities)
-                    .flat()
-                    .filter(({file}) => file)
-                    .forEach(({details, file, line, column}) => core.error(`${file}:${line}:${column}: ${details}`))
-            })
-        }
-        if (core.getInput('output-format') === 'reviewdog') return reviewdog.convert(result)
-        return result;
-    }
-}
 
-run()
-    .then(result => core.setOutput('result', result))
-    .catch(err => core.setFailed(err.message))
+run();
