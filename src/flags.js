@@ -17,12 +17,14 @@ const inputs = [
 /**
     Get the action flags.
 */
-module.exports = function() {
-
+module.exports = function () {
     const flags = [];
+
     // grabs all inputs based on "flags" array.
     for (let input of inputs) {
         const value = core.getInput(input);
         if (value) flags.push(`--${input}="${value}"`)
     }
+
+    return flags;
 }
