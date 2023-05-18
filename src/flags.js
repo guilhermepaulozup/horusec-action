@@ -1,24 +1,28 @@
 'use strict';
 
 const core = require('@actions/core');
-const flags = [
+const inputs = [
+    "analysis-timeout",
+    "certificate-path",
+    "enable-commit-author",
+    "enable-git-history",
+    "enable-owasp-dependency-check",
+    "enable-shellcheck",
+    "ignore-severity",
+    "project-path",
     "ignore",
-    "project_path",
-    "config_file_path",
+    "config-file-path"
 ]
 
-module.exports = class Flags {
-    constructor() {
-        this.flags = []
-        // grabs all inputs based on "flags" array.
-        for (let flag of flags) {
-            const value = core.getInput(flag);
-            core.info(`${flag}="${value}`);
-            if (value) this.flags.push(`--${flag}="${value}"`)
-        }
-    }
+/**
+    Get the action flags.
+*/
+module.exports = function() {
 
-    toString() {
-        return this.flags.join(' ');
+    const flags = [];
+    // grabs all inputs based on "flags" array.
+    for (let input of inputs) {
+        const value = core.getInput(input);
+        if (value) flags.push(`--${input}="${value}"`)
     }
 }

@@ -2,22 +2,57 @@ name: "Horusec"
 description: "Secure Code Analysis."
 
 inputs:
-  horusec_version:
+  # Horusec Action specific inputs.
+  horusec-version:
+    description: The required Horusec CLI version to use. Default to latest.
     required: false
-    default: "v2.8.0"
-  project_path:
+    default: latest
+
+  # Horusec CLI inputs.
+  analysis-timeout:
+    description: The timeout threshold for the Horusec CLI wait for the analysis to complete. The minimum time is 10 (default 600).
+    required: false
+    default: 600
+  certificate-path:
+    description: Path to certificate of authority. Example example/ca.crt.
+    required: false
+    default: null
+  enable-commit-author:
+    description: Enable to search commit author of vulnerabilities.
+    required: false
+    default: false
+  enable-git-history:
+    description: Run Gitleaks and search for vulnerabilities in all git history of the project https://github.com/zricethezav/gitleaks
+    required: false
+    default: false
+  enable-owasp-dependency-check:
+    description: Run Owasp Dependency Check tool https://github.com/jeremylong/DependencyCheck
+    required: false
+    default: false
+  enable-shellcheck:
+    description: Run ShellCheck tool https://github.com/koalaman/shellcheck
+    required: false
+    default: false
+  ignore-severity:
+    description: The level of vulnerabilities to ignore in the output (LOW|MEDIUM|HIGH). Example -s="LOW, HIGH" (default [INFO]).
+    required: false
+    default: null
+  project-path:
+    description: Path to run an analysis. Default to the repository root.
     required: false
     type: string
     default: "."
   ignore:
+    description: Paths to ignore in the analysis. Example -i="/path/to/ignore, **/*_test.go, **/assets/**" (default [*tmp*,**/.vscode/**])
     required: false
     type: string
     default: null
-  config_file_path:
+  config-file-path:
+    description: Horusec config file path. Default to repository root.
     required: false
     type: string
-    default: null
-
+    default: "."
+     
 runs:
   using: 'node16'
   main: 'dist/index.js'
