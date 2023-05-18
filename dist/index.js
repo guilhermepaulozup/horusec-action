@@ -13437,24 +13437,39 @@ const core = __nccwpck_require__(2186);
 const tc = __nccwpck_require__(7784);
 const gh = __nccwpck_require__(5438);
 
+const getRequiredVersion = ( {assets} ) => {
+    const asset = assets
+        .find(({ name }) => name.includes(`${platform}_${arch}`));
+    if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arch}`); }
+    return asset.browser_download_url;
+}
+
 /**
-    Parses the container OS.
+    Retr.
     @param {string} version The version of the binary to download.
     @returns {string} The binary download url.
 */
-const getVersion = async (version = "latest") => {
+const getReleases = async (version = "latest") => {
     const octokit = gh.getOctokit(core.getInput('github-token'));
-
-    const { data } = await octokit.rest.repos.getReleaseByTag(
-        { owner: "ZupIT", repo: "horusec", tag: version }
-    );
-
-    const asset = data
-        .assets
-        .find(({ name }) => name.includes(`${platform}_${arch}`));
-    if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arch}`); }
-
-    return asset.browser_download_url;
+    const fullName = {
+        owner: "ZupIT",
+        repo: "horusec"
+    };
+    
+    let data = {}
+    core.debug("Version: " + version);
+    if (version !== "latest") {
+        const resp = await octokit.rest.repos.getReleaseByTag(
+            { tag: version, ...fullName }
+        );
+        data = resp.data;
+    } else {
+        const resp = await octokit.rest.repos.getLatestRelease(fullName);
+        data = resp.data;
+    }
+    const platform = "linux"
+    const arch = "x86"
+    return data;
 }
 
 /**
@@ -13462,8 +13477,10 @@ const getVersion = async (version = "latest") => {
 */
 module.exports = async function () {
     const version = core.getInput("horusec-version");
-    core.info("Testing..");
-    const horusecUrl = getVersion(version);
+    core.debug("Testing..");
+    const data = await getReleases(version);
+    const horusecUrl = getRequiredVersion(data);
+    core.debug(horusecUrl);
     const horusecPath = await tc.downloadTool(horusecUrl);
     // gives binary permission to execute.
     fs.chmodSync(horusecPath, 0o755);
@@ -13503,7 +13520,8 @@ module.exports = function () {
     // grabs all inputs based on "flags" array.
     for (let input of inputs) {
         const value = core.getInput(input);
-        if (value) flags.push(`--${input}="${value}"`)
+        core.debug(`--${input}="${value}"`);
+        if (value) flags.push(`--${input}=${value}`)
     }
 
     return flags;
@@ -13736,9 +13754,9 @@ async function run() {
     const executable = await download();
     // execute the horusec.
     core.info("Executing Horusec...");
-
+    core.debug("Flags: " + flags());
     try {
-        await exec.exec(executable, flags);
+        await exec.exec(executable, ["start", ...flags()]);
     } catch (err) {
         core.setFailed(err.message);
     }

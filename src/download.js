@@ -24,7 +24,6 @@ const getReleases = async (version = "latest") => {
     };
     
     let data = {}
-    
     core.debug("Version: " + version);
     if (version !== "latest") {
         const resp = await octokit.rest.repos.getReleaseByTag(
