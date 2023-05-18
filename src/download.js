@@ -34,8 +34,6 @@ const getReleases = async (version = "latest") => {
         const resp = await octokit.rest.repos.getLatestRelease(fullName);
         data = resp.data;
     }
-    const platform = "linux"
-    const arch = "x86"
     return data;
 }
 
@@ -48,6 +46,7 @@ module.exports = async function () {
     const data = await getReleases(version);
     const horusecUrl = getRequiredVersion(data);
     core.debug(horusecUrl);
+    // TODO: 
     const horusecPath = await tc.downloadTool(horusecUrl);
     // gives binary permission to execute.
     fs.chmodSync(horusecPath, 0o755);
