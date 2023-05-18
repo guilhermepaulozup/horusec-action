@@ -6526,13 +6526,28 @@ const fs = __nccwpck_require__(7147);
 const {platform, arch} = __nccwpck_require__(7282);
 const core = __nccwpck_require__(2186);
 const tc = __nccwpck_require__(7784);
+const https = __nccwpck_require__(5687);
 
+/**
+    Parses the container OS.
+*/
+const getVersion = () => {
+    return "horusec_linux_amd64";
+}
+
+/**
+    Download the required horusec binary.
+*/
 module.exports = async function () {
-    // const version = core.getInput("horusec-version");
-    const version = "v2.8.0"
-    const url = `https://github.com/ZupIT/horusec/releases/download/${version}/horusec_linux_amd64`;
+    const version = core.getInput("horusec-version");
+    const osVersion = getVersion();
+    const url = `https://github.com/ZupIT/horusec/releases/download/${version}/${osVersion}`;
+
+    // downloads the binary into the temp directory.
     const horusecPath = await tc.downloadTool(url);
+    // gives binary permission to execute.
     fs.chmodSync(horusecPath, 0o755);
+    
     return horusecPath;
 }
 
@@ -6545,25 +6560,29 @@ module.exports = async function () {
 
 
 const core = __nccwpck_require__(2186);
-const flags = [
+const inputs = [
+    "analysis-timeout",
+    "certificate-path",
+    "enable-commit-author",
+    "enable-git-history",
+    "enable-owasp-dependency-check",
+    "enable-shellcheck",
+    "ignore-severity",
+    "project-path",
     "ignore",
-    "project_path",
-    "config_file_path",
+    "config-file-path"
 ]
 
-module.exports = class Flags {
-    constructor() {
-        this.flags = []
-        // grabs all inputs based on "flags" array.
-        for (let flag of flags) {
-            const value = core.getInput(flag);
-            core.info(`${flag}="${value}`);
-            if (value) this.flags.push(`--${flag}="${value}"`)
-        }
-    }
+/**
+    Get the action flags.
+*/
+module.exports = function() {
 
-    toString() {
-        return this.flags.join(' ');
+    const flags = [];
+    // grabs all inputs based on "flags" array.
+    for (let input of inputs) {
+        const value = core.getInput(input);
+        if (value) flags.push(`--${input}="${value}"`)
     }
 }
 
@@ -6738,31 +6757,37 @@ module.exports = require("util");
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-const { spawn } = __nccwpck_require__(2081);
 const core = __nccwpck_require__(2186);
 const exec = __nccwpck_require__(1514);
-const Flags = __nccwpck_require__(5564);
+const flags = __nccwpck_require__(5564);
 const download = __nccwpck_require__(7129);
 
-
+/**
+    Run function setup the required flags, horusec version and execute.
+*/
 async function run() {
     // grabs all action inputs.
     core.info("Getting action inputs.");
-    const fl = new Flags();
+
+    // downloads the horusec binary.
     core.info("Downloading required Horusec binary.")
-    core.info(fl);
     const executable = await download();
+
+    // execute the horusec.
     core.info("Executing Horusec...");
+
     try {
-        await exec.exec(executable, ["start", "-p", ".", "-O", "./report.json", "-o", "json"]);
+        await exec.exec(executable, flags);
     } catch (err) {
         core.setFailed(err.message);
     }
+
     core.info("Horusec finished the analysis in your code..");
 };
 
 
 run();
+
 })();
 
 module.exports = __webpack_exports__;
