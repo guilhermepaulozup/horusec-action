@@ -23,7 +23,8 @@ module.exports = function () {
     // grabs all inputs based on "flags" array.
     for (let input of inputs) {
         const value = core.getInput(input);
-        if (value) flags.push(`--${input}="${value}"`)
+        core.debug(`--${input}="${value}"`);
+        if (value) flags.push(`--${input}=${value}`)
     }
 
     return flags;

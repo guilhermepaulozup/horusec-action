@@ -14,9 +14,9 @@ async function run() {
     const executable = await download();
     // execute the horusec.
     core.info("Executing Horusec...");
-
+    core.debug("Flags: " + flags());
     try {
-        await exec.exec(executable, flags);
+        await exec.exec(executable, ["start", ...flags()]);
     } catch (err) {
         core.setFailed(err.message);
     }

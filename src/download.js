@@ -11,11 +11,26 @@ const gh = require("@actions/github");
 */
 const getVersion = async (version = "latest") => {
     const octokit = gh.getOctokit(core.getInput('github-token'));
-
-    const { data } = await octokit.rest.repos.getReleaseByTag(
-        { owner: "ZupIT", repo: "horusec", tag: version }
-    );
-
+    const fullName = {
+        owner: "ZupIT",
+        repo: "horusec"
+    };
+    
+    let data = {}
+    
+    core.debug("Version: " + version);
+    if (version !== "latest") {
+        const resp = await octokit.rest.repos.getReleaseByTag(
+            { tag: version, ...fullName }
+        );
+        data = resp.data;
+    } else {
+        const resp = await octokit.rest.repos.getLatestRelease(fullName);
+        data = resp.data;
+    }
+    const platform = "linux"
+    const arch = "x86"
+    core.info(`${platform}_${arch}`);
     const asset = data
         .assets
         .find(({ name }) => name.includes(`${platform}_${arch}`));
@@ -29,8 +44,9 @@ const getVersion = async (version = "latest") => {
 */
 module.exports = async function () {
     const version = core.getInput("horusec-version");
-    core.info("Testing..");
-    const horusecUrl = getVersion(version);
+    core.debug("Testing..");
+    const horusecUrl = await getVersion(version);
+    core.debug(horusecUrl);
     const horusecPath = await tc.downloadTool(horusecUrl);
     // gives binary permission to execute.
     fs.chmodSync(horusecPath, 0o755);
