@@ -4,9 +4,8 @@
   "description": "Horusec is a free and open-source Static Application Security Testing (SAST).",
   "main": "index.js",
   "scripts": {
-    "prepare": "ncc build src/**.js -o dist --source-map --license licenses.txt",
-    "lint": "npx eslint src/",
-    "all": "npm run prepare"
+    "prepare": "ncc build src/run.js -o dist --source-map --license licenses.txt",
+    "lint": "npx eslint src/"
   },
   "repository": {
     "type": "git",
