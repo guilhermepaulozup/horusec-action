@@ -39,7 +39,7 @@ const getAllReleases = async (version = "latest") => {
   const fullName = { owner: "ZupIT", repo: "horusec" };
 
   if (version === "latest") {
-    core.debug(`GET /repos/${owner}/${repo}/releases/latest/`);
+    core.debug(`GET /repos/${fullName.owner}/${fullName.repo}/releases/latest/`);
     const resp = await octokit.rest.repos.getLatestRelease(fullName);
 
     if (resp.status !== 200) {
@@ -48,7 +48,7 @@ const getAllReleases = async (version = "latest") => {
 
     return resp.data;
   } else {
-    core.debug(`GET /repos/${owner}/${repo}/releases/tags/${version}`);
+    core.debug(`GET /repos/${fullName.owner}/${fullName.repo}/releases/tags/${version}`);
     const resp = await octokit.rest.repos.getReleaseByTag(
       { tag: version, ...fullName }
     );
