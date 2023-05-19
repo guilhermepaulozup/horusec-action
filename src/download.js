@@ -9,11 +9,12 @@ const gh = require("@actions/github");
             isnt working. Probably should use another method than Platform and arch.
 */
 const getRequiredVersion = ( {assets} ) => {
-    if (arch === "x64") arch = 'amd64'; // parses process.arch from x64 to amd64
+    let arq = arch;
+    if (arq === "x64") arq = 'amd64'; // parses process.arch from x64 to amd64
 
     const asset = assets
-        .find(({ name }) => name.includes(`${platform}_${arch}`));
-    if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arch}`); }
+        .find(({ name }) => name.includes(`${platform}_${arq}`));
+    if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arq}`); }
     return asset.browser_download_url;
 }
 
