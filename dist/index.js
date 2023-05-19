@@ -13758,8 +13758,8 @@ async function run() {
     core.info("Downloading required Horusec binary.")
     const executable = await download();
     const flags = [
-        `--project-path=\"${core.getInput('project-path')}\"`,
-        `--config-file-path=\"${core.getInput('config-file-path')}\"`,
+        `--project-path=${core.getInput('project-path')}`,
+        `--config-file-path=${core.getInput('config-file-path')}`,
         ...getFlags()
     ]
     core.debug("Flags: " + flags);
