@@ -13439,47 +13439,59 @@ const gh = __nccwpck_require__(5438);
 
 
 
-/* 
-    Get the required 
+/*
+    Find the correct binary for the runner architecture.
 */
-const findRequiredBinaryUrl = (data) => {
+const findRequiredBinaryUrl = (assets) => {
   let arq = arch;
   if (arq === "x64") arq = 'amd64'; // parses process.arch from x64 to amd64
 
-  const asset = data.assets
+  const asset = assets
     .find(({ name }) => name.includes(`${platform}_${arq}`));
   if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arq}`); }
   return asset.browser_download_url;
 }
 
-/**
-    Retr.
-    @param {string} version The version of the binary to download.
-    @returns {string} The binary download url.
-*/
-const getAllReleases = async (version = "latest") => {
+const getGithubTokenInput = () => {
   core.debug("Trying to get the github-token from inputs.");
   let token = core.getInput('github-token');
   if (!token) {
     core.debug("Github token input not informed. Using environment variables.");
     token = process.env.GITHUB_TOKEN;
   }
+  return token;
+}
 
-  const octokit = gh.getOctokit(process.env.GITHUB_TOKEN);
+/**
+    Fetch release data from Rest API.
+    @param {string} version The version of the binary to download.
+    @returns {string} The binary download url.
+*/
+const getAllReleases = async (version = "latest") => {
+  const octokit = gh.getOctokit(getGithubTokenInput());
   const fullName = { owner: "ZupIT", repo: "horusec" };
-  let data = {}
+
   if (version === "latest") {
     core.debug(`GET /repos/${owner}/${repo}/releases/latest/`);
     const resp = await octokit.rest.repos.getLatestRelease(fullName);
-    data = resp.data;
+
+    if (resp.status !== 200) {
+      throw new Error(`Failed to fetch the REST API with HTTP Status Code: ${resp.status}`);
+    }
+
+    return resp.data;
   } else {
     core.debug(`GET /repos/${owner}/${repo}/releases/tags/${version}`);
     const resp = await octokit.rest.repos.getReleaseByTag(
       { tag: version, ...fullName }
     );
-    data = resp.data;
+
+    if (resp.status !== 200) {
+      throw new Error(`Failed to fetch the REST API with HTTP Status Code: ${resp.status}`);
+    }
+
+    return resp.data;
   }
-  return data;
 }
 
 /**
@@ -13491,7 +13503,7 @@ async function download(version) {
   const data = await getAllReleases(version);
   // finds the required release for the currently runner architecture
   core.debug("Searching the correct binary for the currently runner architecture.");
-  const horusecUrl = findRequiredBinaryUrl(data);
+  const horusecUrl = findRequiredBinaryUrl(data.assets);
   // download the binary into the runner tmp folder (RUNNER_TEMP)
   core.debug("Binary found, downloading...");
   const horusecPath = await tc.downloadTool(horusecUrl);
@@ -13501,7 +13513,7 @@ async function download(version) {
   return horusecPath;
 }
 
-module.exports = { download, getReleases: getAllReleases, getRequiredVersion: findRequiredBinaryUrl }
+module.exports = { download, getAllReleases, findRequiredBinaryUrl}
 
 
 /***/ }),
@@ -13514,40 +13526,41 @@ module.exports = { download, getReleases: getAllReleases, getRequiredVersion: fi
 
 const core = __nccwpck_require__(2186);
 const inputs = [
-    "analysis-timeout",
-    "log-level",
-    "config-file-path",
-    "certificate-path",
-    "ignore-severity",
-    "ignore",
-    "enable-commit-author",
-    "enable-git-history",
-    "enable-owasp-dependency-check",
-    "enable-shellcheck",
+  "analysis-timeout",
+  "log-level",
+  "config-file-path",
+  "certificate-path",
+  "ignore-severity",
+  "ignore",
+  "enable-commit-author",
+  "enable-git-history",
+  "enable-owasp-dependency-check",
+  "enable-shellcheck",
 ];
 
 /**
     Get the action flags.
 */
 function getFlags() {
-    const flags = [
-        "start",
-        "-o", "json",
-        "-O", "horusec.json",
-        "--project-path", core.getInput('project-path', {required: true})
-    ];
-    // grabs all inputs based on "flags" array.
-    core.debug("Reading all flags from the flags array.");
-    for (let input of inputs) {
-        const value = core.getInput(input);
-        if (value) {
-            flags.push(`--${input}`);
-            flags.push(value);
-        }
+  const flags = [
+    "start",
+    "-o", "json",
+    "-O", "horusec.json",
+    "--project-path", core.getInput('project-path', { required: true })
+  ];
+  // grabs all inputs based on "flags" array.
+  core.debug("Reading all flags from the flags array.");
+  for (let input of inputs) {
+    const value = core.getInput(input);
+    if (value) {
+      flags.push(`--${input}`);
+      flags.push(value);
     }
-    
-    return flags;
+  }
+
+  return flags;
 }
+
 module.exports = { getFlags };
 
 /***/ }),
@@ -13763,26 +13776,26 @@ var __webpack_exports__ = {};
 (() => {
 const core = __nccwpck_require__(2186);
 const exec = __nccwpck_require__(1514);
-const getFlags = __nccwpck_require__(5564);
-const download = __nccwpck_require__(7129);
+const { getFlags } = __nccwpck_require__(5564);
+const { download } = __nccwpck_require__(7129);
 
 /**
     Run function setup the required flags, horusec version and execute.
 */
 async function run() {
-    // gets the horusec-version input value.
-    const version = core.getInput("horusec-version");
-    core.info(`INFO: Required horusec version: ${version}.`);
-    // downloads the horusec binary.
-    const executable = await download(version);
-    // adds needed project-path to the execution flag.
-    core.debug("Horusec execution start.");
-    try {
-        const code = await exec.exec(executable, ...getFlags());
-        core.debug("Horusec execution end.")
-    } catch (err) {
-        core.setFailed(err.message);
-    }
+  // gets the horusec-version input value.
+  const version = core.getInput("horusec-version");
+  core.info(`INFO: Required horusec version: ${version}.`);
+  // downloads the horusec binary.
+  const executable = await download(version);
+  // adds needed project-path to the execution flag.
+  core.debug("Horusec execution start.");
+  try {
+    const code = await exec.exec(executable, ...getFlags());
+    core.debug("Horusec execution end.")
+  } catch (err) {
+    core.setFailed(err.message);
+  }
 }
 
 run();
