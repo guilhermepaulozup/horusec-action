@@ -13442,9 +13442,11 @@ const gh = __nccwpck_require__(5438);
             isnt working. Probably should use another method than Platform and arch.
 */
 const getRequiredVersion = ( {assets} ) => {
+    if (arch === "x64") arch = 'amd64'; // parses process.arch from x64 to amd64
+
     const asset = assets
-        .find(({ name }) => name.includes(`linux_x86`));
-    if (!asset) { throw new Error(`Failed to find binary for: linux_x86`); }
+        .find(({ name }) => name.includes(`${platform}_${arch}`));
+    if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arch}`); }
     return asset.browser_download_url;
 }
 
@@ -13529,6 +13531,7 @@ module.exports = function () {
 
     return flags;
 }
+
 
 /***/ }),
 
