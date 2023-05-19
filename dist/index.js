@@ -13504,7 +13504,7 @@ module.exports = async function () {
 
 
 const core = __nccwpck_require__(2186);
-const inputs = [
+const extraFlags = [
     "analysis-timeout",
     "certificate-path",
     "enable-commit-author",
@@ -13512,27 +13512,25 @@ const inputs = [
     "enable-owasp-dependency-check",
     "enable-shellcheck",
     "ignore-severity",
-    "project-path",
     "ignore",
-    "config-file-path"
 ]
 
 /**
     Get the action flags.
 */
-module.exports = function () {
+function getFlags() {
     const flags = [];
 
     // grabs all inputs based on "flags" array.
-    for (let input of inputs) {
+    for (let input of extraFlags) {
         const value = core.getInput(input);
         core.debug(`--${input}="${value}"`);
-        if (value) flags.push(`--${input}=\"${value}\"`);
+        if (value) flags.push(`--${input}=${value}`);
     }
 
     return flags;
 }
-
+module.exports = getFlags;
 
 /***/ }),
 
@@ -13747,7 +13745,7 @@ var __webpack_exports__ = {};
 (() => {
 const core = __nccwpck_require__(2186);
 const exec = __nccwpck_require__(1514);
-const flags = __nccwpck_require__(5564);
+const getFlags = __nccwpck_require__(5564);
 const download = __nccwpck_require__(7129);
 
 /**
@@ -13759,16 +13757,22 @@ async function run() {
     // downloads the horusec binary.
     core.info("Downloading required Horusec binary.")
     const executable = await download();
-    // execute the horusec.
+    const flags = [
+        `--project-path=\"${core.getInput('project-path')}\"`,
+        `--config-file-path=\"${core.getInput('config-file-path')}\"`,
+        ...getFlags()
+    ]
+    core.debug("Flags: " + flags);
+
+    // execute the horusec cli using the flags.
     core.info("Executing Horusec...");
-    core.debug("Flags: " + flags());
     try {
-        await exec.exec(executable, ["start", ...flags()]);
+        const code = await exec.exec(executable, ["start", flags]);
+        core.info("Horusec finished the analysis in your code..");    
+        core.ExitCode = code;
     } catch (err) {
         core.setFailed(err.message);
     }
-
-    core.info("Horusec finished the analysis in your code..");
 };
 
 

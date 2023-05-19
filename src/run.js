@@ -1,6 +1,6 @@
 const core = require("@actions/core");
 const exec = require("@actions/exec");
-const flags = require("./flags");
+const getFlags = require("./flags");
 const download = require("./download");
 
 /**
@@ -12,16 +12,22 @@ async function run() {
     // downloads the horusec binary.
     core.info("Downloading required Horusec binary.")
     const executable = await download();
-    // execute the horusec.
+    const flags = [
+        `--project-path=\"${core.getInput('project-path')}\"`,
+        `--config-file-path=\"${core.getInput('config-file-path')}\"`,
+        ...getFlags()
+    ]
+    core.debug("Flags: " + flags);
+
+    // execute the horusec cli using the flags.
     core.info("Executing Horusec...");
-    core.debug("Flags: " + flags());
     try {
-        await exec.exec(executable, ["start", ...flags()]);
+        const code = await exec.exec(executable, ["start", flags]);
+        core.info("Horusec finished the analysis in your code..");    
+        core.ExitCode = code;
     } catch (err) {
         core.setFailed(err.message);
     }
-
-    core.info("Horusec finished the analysis in your code..");
 };
 
 

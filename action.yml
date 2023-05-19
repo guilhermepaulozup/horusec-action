@@ -14,14 +14,28 @@ inputs:
     default: latest
   
   # Horusec CLI inputs.
+
+  ### Numeric inputs
   analysis-timeout:
-    description: The timeout threshold for the Horusec CLI wait for the analysis to complete. The minimum time is 10 (default 600).
+    description: The timeout threshold for the Horusec CLI wait for the analysis to complete. The minimum time is 10 (default to 600 cli).
     required: false
-    default: 600
+    default: null
+
+  ### String inputs
   certificate-path:
     description: Path to certificate of authority. Example example/ca.crt.
     required: false
     default: null
+  project-path:
+    description: Path to run an analysis. Default to the repository root.
+    required: false
+    default: "."
+  config-file-path:
+    description: Horusec config file path. Default to repository root.
+    required: false
+    default: "."
+
+  ### Boolean inputs
   enable-commit-author:
     description: Enable to search commit author of vulnerabilities.
     required: false
@@ -38,31 +52,21 @@ inputs:
     description: Run ShellCheck tool https://github.com/koalaman/shellcheck
     required: false
     default: false
-  ignore-severity:
-    description: The level of vulnerabilities to ignore in the output (LOW|MEDIUM|HIGH). Example -s="LOW, HIGH" (default [INFO]).
-    type: string
-    required: false
-    default: null
-  project-path:
-    description: Path to run an analysis. Default to the repository root.
-    required: false
-    type: string
-    default: "."
-  ignore:
-    description: Paths to ignore in the analysis. Example -i="/path/to/ignore, **/*_test.go, **/assets/**" (default [*tmp*,**/.vscode/**])
-    required: false
-    type: string
-    default: null
-  config-file-path:
-    description: Horusec config file path. Default to repository root.
-    required: false
-    type: string
-    default: "."
   return-error:
     description: If the execution should return Error if vulnerabilities are found.
     required: false
     default: false
-     
+
+  ### Array inputs (strings separated by ",")
+  ignore-severity:
+    description: The level of vulnerabilities to ignore in the output (LOW|MEDIUM|HIGH). Example -s="LOW, HIGH" (default [INFO]).
+    required: false
+    default: null
+  ignore:
+    description: Paths to ignore in the analysis. Example -i="/path/to/ignore, **/*_test.go, **/assets/**" (default [*tmp*,**/.vscode/**])
+    required: false
+    default: null
+
 runs:
   using: 'node16'
   main: 'dist/index.js'
