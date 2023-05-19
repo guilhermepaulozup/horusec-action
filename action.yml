@@ -4,8 +4,8 @@ description: "Secure Code Analysis."
 inputs:
   # Horusec Action specific inputs.
   github-token:
-    description: The github token to use in the action.
-    required: true
+    description: The github token to use when fetching the horusec binary.
+    required: false
     default: null
     
   horusec-version:
@@ -22,6 +22,10 @@ inputs:
     default: null
 
   ### String inputs
+  log-level:
+    description: Set log level ("panic"|"fatal"|"error"|"warn"|"info"|"debug"|"trace") (default "info")
+    required: false
+    default: null
   certificate-path:
     description: Path to certificate of authority. Example example/ca.crt.
     required: false
@@ -32,6 +36,14 @@ inputs:
     default: "."
   config-file-path:
     description: Horusec config file path. Default to repository root.
+    required: false
+    default: null
+  ignore-severity:
+    description: The level of vulnerabilities to ignore in the output (LOW|MEDIUM|HIGH). Example -s="LOW, HIGH" (default [INFO]).
+    required: false
+    default: null
+  ignore:
+    description: Paths to ignore in the analysis. Example -i="/path/to/ignore, **/*_test.go, **/assets/**" (default [*tmp*,**/.vscode/**])
     required: false
     default: null
 
@@ -54,16 +66,6 @@ inputs:
     default: null
   return-error:
     description: If the execution should return Error if vulnerabilities are found.
-    required: false
-    default: null
-
-  ### Array inputs (strings separated by ",")
-  ignore-severity:
-    description: The level of vulnerabilities to ignore in the output (LOW|MEDIUM|HIGH). Example -s="LOW, HIGH" (default [INFO]).
-    required: false
-    default: null
-  ignore:
-    description: Paths to ignore in the analysis. Example -i="/path/to/ignore, **/*_test.go, **/assets/**" (default [*tmp*,**/.vscode/**])
     required: false
     default: null
 

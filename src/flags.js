@@ -3,6 +3,7 @@
 const core = require('@actions/core');
 const inputs = [
     "analysis-timeout",
+    "log-level",
     "config-file-path",
     "certificate-path",
     "ignore-severity",
@@ -17,9 +18,14 @@ const inputs = [
     Get the action flags.
 */
 function getFlags() {
-    const flags = [];
-
+    const flags = [
+        "start",
+        "-o", "json",
+        "-O", "horusec.json",
+        "--project-path", core.getInput('project-path', {required: true})
+    ];
     // grabs all inputs based on "flags" array.
+    core.debug("Reading all flags from the flags array.");
     for (let input of inputs) {
         const value = core.getInput(input);
         if (value) {
@@ -27,7 +33,7 @@ function getFlags() {
             flags.push(value);
         }
     }
-
+    
     return flags;
 }
 module.exports = { getFlags };
