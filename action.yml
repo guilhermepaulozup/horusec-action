@@ -12,6 +12,11 @@ inputs:
     description: The required Horusec CLI version to use. Default to latest.
     required: false
     default: latest
+
+  use-summary:
+    description: Print horusec vulnerabilities to summary.
+    required: false
+    default: false
   
   # Horusec CLI inputs.
 

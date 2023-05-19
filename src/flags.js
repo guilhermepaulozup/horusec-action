@@ -14,16 +14,16 @@ const inputs = [
   "enable-shellcheck",
 ];
 
+
 /**
     Get the action flags.
 */
 function getFlags() {
   const flags = [
     "start",
-    "-o", "json",
-    "-O", "horusec.json",
     "--project-path", core.getInput('project-path', { required: true })
   ];
+
   // grabs all inputs based on "flags" array.
   core.debug("Reading all flags from the flags array.");
   for (let input of inputs) {
@@ -33,6 +33,7 @@ function getFlags() {
       flags.push(value);
     }
   }
+
   core.debug("Active flags:");
   core.debug(flags.slice(1));
   return flags;

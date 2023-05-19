@@ -13538,16 +13538,16 @@ const inputs = [
   "enable-shellcheck",
 ];
 
+
 /**
     Get the action flags.
 */
 function getFlags() {
   const flags = [
     "start",
-    "-o", "json",
-    "-O", "horusec.json",
     "--project-path", core.getInput('project-path', { required: true })
   ];
+
   // grabs all inputs based on "flags" array.
   core.debug("Reading all flags from the flags array.");
   for (let input of inputs) {
@@ -13557,12 +13557,39 @@ function getFlags() {
       flags.push(value);
     }
   }
+
   core.debug("Active flags:");
   core.debug(flags.slice(1));
   return flags;
 }
 
 module.exports = { getFlags };
+
+/***/ }),
+
+/***/ 7259:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(2186);
+
+/**
+ * Checks wether the use-summary is used.
+ * @returns {boolean}
+ */
+const getSummaryFlag = () => {
+  const useSummary = core.getInput('use-summary');
+  if (useSummary && useSummary === "true") {
+    return true; 
+  }
+  return false;
+}
+
+const buildSummary = (file = 'horusec-report.json') => {
+  // const report = JSON.parse(fs.readFileSync('horusec-report.json'));
+  throw new Error("Not implemented yet")
+}
+
+module.exports = { getSummaryFlag, buildSummary }
 
 /***/ }),
 
@@ -13775,10 +13802,13 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
+const fs = __nccwpck_require__(7147);
 const core = __nccwpck_require__(2186);
 const exec = __nccwpck_require__(1514);
+
 const { getFlags } = __nccwpck_require__(5564);
 const { download } = __nccwpck_require__(7129);
+const { buildSummary, getSummaryFlag } = __nccwpck_require__(7259);
 
 /**
     Run function setup the required flags, horusec version and execute.
@@ -13791,9 +13821,19 @@ async function run() {
   const executable = await download(version);
   // adds needed project-path to the execution flag.
   core.debug("Horusec execution start.");
+  const execFlags = getFlags();
+
+  const useSummary = getSummaryFlag();
+  if (useSummary) {
+    flags.push(...["-o", "json", "-O", "horusec-report.json"]);
+  }
   try {
-    const code = await exec.exec(executable, getFlags());
-    core.debug("Horusec execution end.")
+    const code = await exec.exec(executable, execFlags);
+    core.debug("Horusec execution end.");
+    // TODO: Should read the useSummary flag and print the horusec report to Github Summary.
+    if (useSummary) {
+      buildSummary(report);
+    }
   } catch (err) {
     core.setFailed(err.message);
   }

@@ -1,0 +1,138 @@
+{
+  "version": "v2.8.0",
+  "id": "e6559b8f-a04c-44a0-8e61-8e742684ecf9",
+  "repositoryID": "00000000-0000-0000-0000-000000000000",
+  "repositoryName": "",
+  "workspaceID": "00000000-0000-0000-0000-000000000000",
+  "workspaceName": "",
+  "status": "success",
+  "errors": "",
+  "createdAt": "2023-04-17T10:32:46.221190811-03:00",
+  "finishedAt": "2023-04-17T10:33:33.318676857-03:00",
+  "analysisVulnerabilities": [
+    {
+      "vulnerabilityID": "00000000-0000-0000-0000-000000000000",
+      "analysisID": "e6559b8f-a04c-44a0-8e61-8e742684ecf9",
+      "createdAt": "2023-04-17T10:33:33.318682684-03:00",
+      "vulnerabilities": {
+        "vulnerabilityID": "88d665ec-500e-4747-a0b8-71943e25ad6d",
+        "line": "246",
+        "column": "42",
+        "confidence": "MEDIUM",
+        "file": "tests/metrics/test_metricsbuilder.py",
+        "code": "s://user:secret@repos.com\")[\"stack_url\"] == \"https://*****@repos.com\"",
+        "details": "(1/1) * Possible vulnerability detected: Password found in a hardcoded URL\nA password was found in a hardcoded URL, this can lead to not only the leak of this password but also a failure point to some more sophisticated CSRF and SSRF attacks. Check CWE-352 (https://cwe.mitre.org/data/definitions/352.html) and CWE-918 (https://cwe.mitre.org/data/definitions/918.html) for more details.",
+        "securityTool": "HorusecEngine",
+        "language": "Leaks",
+        "severity": "CRITICAL",
+        "type": "Vulnerability",
+        "commitAuthor": "One more Dev",
+        "commitEmail": "5b7fc45b1bf19@example.com",
+        "commitHash": "3c637c25e83eaf7c628acc5b7fc45b1bf19f1bf8",
+        "commitMessage": "Release 4.4.0 (#821)",
+        "commitDate": "2022-12-22 15:36:09 -0300",
+        "rule_id": "HS-LEAKS-27",
+        "vulnHash": "28b1d46a185cfaa94caa22bbd89be7ad3ef3ee8d28fbdf53410b2be58aa9abc8",
+        "deprecatedHashes": [
+          "b260c7a9ee236c607615bac4c3f418ebbac38cf6aa4fc8b782cfdaee71d00d51",
+          "19156d11783db8c646270ebe1e80d7ffb071ded59c68599ae85a6f20a416ea84"
+        ],
+        "securityToolVersion": "",
+        "securityToolInfoUri": ""
+      }
+    },
+    {
+      "vulnerabilityID": "00000000-0000-0000-0000-000000000000",
+      "analysisID": "e6559b8f-a04c-44a0-8e61-8e742684ecf9",
+      "createdAt": "2023-04-17T10:33:33.318682684-03:00",
+      "vulnerabilities": {
+        "vulnerabilityID": "88d665ec-500e-4747-a0b8-71943e25ad6d",
+        "line": "246",
+        "column": "42",
+        "confidence": "MEDIUM",
+        "file": "tests/metrics/test_metricsbuilder.py",
+        "code": "s://user:secret@repos.com\")[\"stack_url\"] == \"https://*****@repos.com\"",
+        "details": "(1/1) * Possible vulnerability detected: Password found in a hardcoded URL\nA password was found in a hardcoded URL, this can lead to not only the leak of this password but also a failure point to some more sophisticated CSRF and SSRF attacks. Check CWE-352 (https://cwe.mitre.org/data/definitions/352.html) and CWE-918 (https://cwe.mitre.org/data/definitions/918.html) for more details.",
+        "securityTool": "HorusecEngine",
+        "language": "Leaks",
+        "severity": "HIGH",
+        "type": "Vulnerability",
+        "commitAuthor": "One more Dev",
+        "commitEmail": "5b7fc45b1bf19@example.com",
+        "commitHash": "3c637c25e83eaf7c628acc5b7fc45b1bf19f1bf8",
+        "commitMessage": "Release 4.4.0 (#821)",
+        "commitDate": "2022-12-22 15:36:09 -0300",
+        "rule_id": "HS-LEAKS-27",
+        "vulnHash": "28b1d46a185cfaa94caa22bbd89be7ad3ef3ee8d28fbdf53410b2be58aa9abc8",
+        "deprecatedHashes": [
+          "b260c7a9ee236c607615bac4c3f418ebbac38cf6aa4fc8b782cfdaee71d00d51",
+          "19156d11783db8c646270ebe1e80d7ffb071ded59c68599ae85a6f20a416ea84"
+        ],
+        "securityToolVersion": "",
+        "securityToolInfoUri": ""
+      }
+    },
+    {
+      "vulnerabilityID": "00000000-0000-0000-0000-000000000000",
+      "analysisID": "e6559b8f-a04c-44a0-8e61-8e742684ecf9",
+      "createdAt": "2023-04-17T10:33:33.318682684-03:00",
+      "vulnerabilities": {
+        "vulnerabilityID": "88d665ec-500e-4747-a0b8-71943e25ad6d",
+        "line": "246",
+        "column": "42",
+        "confidence": "MEDIUM",
+        "file": "tests/metrics/test_metricsbuilder.py",
+        "code": "s://user:secret@repos.com\")[\"stack_url\"] == \"https://*****@repos.com\"",
+        "details": "(1/1) * Possible vulnerability detected: Password found in a hardcoded URL\nA password was found in a hardcoded URL, this can lead to not only the leak of this password but also a failure point to some more sophisticated CSRF and SSRF attacks. Check CWE-352 (https://cwe.mitre.org/data/definitions/352.html) and CWE-918 (https://cwe.mitre.org/data/definitions/918.html) for more details.",
+        "securityTool": "HorusecEngine",
+        "language": "Leaks",
+        "severity": "MEDIUM",
+        "type": "Vulnerability",
+        "commitAuthor": "One more Dev",
+        "commitEmail": "5b7fc45b1bf19@example.com",
+        "commitHash": "3c637c25e83eaf7c628acc5b7fc45b1bf19f1bf8",
+        "commitMessage": "Release 4.4.0 (#821)",
+        "commitDate": "2022-12-22 15:36:09 -0300",
+        "rule_id": "HS-LEAKS-27",
+        "vulnHash": "28b1d46a185cfaa94caa22bbd89be7ad3ef3ee8d28fbdf53410b2be58aa9abc8",
+        "deprecatedHashes": [
+          "b260c7a9ee236c607615bac4c3f418ebbac38cf6aa4fc8b782cfdaee71d00d51",
+          "19156d11783db8c646270ebe1e80d7ffb071ded59c68599ae85a6f20a416ea84"
+        ],
+        "securityToolVersion": "",
+        "securityToolInfoUri": ""
+      }
+    },
+    {
+      "vulnerabilityID": "00000000-0000-0000-0000-000000000000",
+      "analysisID": "e6559b8f-a04c-44a0-8e61-8e742684ecf9",
+      "createdAt": "2023-04-17T10:33:33.318682684-03:00",
+      "vulnerabilities": {
+        "vulnerabilityID": "88d665ec-500e-4747-a0b8-71943e25ad6d",
+        "line": "246",
+        "column": "42",
+        "confidence": "MEDIUM",
+        "file": "tests/metrics/test_metricsbuilder.py",
+        "code": "s://user:secret@repos.com\")[\"stack_url\"] == \"https://*****@repos.com\"",
+        "details": "(1/1) * Possible vulnerability detected: Password found in a hardcoded URL\nA password was found in a hardcoded URL, this can lead to not only the leak of this password but also a failure point to some more sophisticated CSRF and SSRF attacks. Check CWE-352 (https://cwe.mitre.org/data/definitions/352.html) and CWE-918 (https://cwe.mitre.org/data/definitions/918.html) for more details.",
+        "securityTool": "HorusecEngine",
+        "language": "Leaks",
+        "severity": "LOW",
+        "type": "Vulnerability",
+        "commitAuthor": "One more Dev",
+        "commitEmail": "5b7fc45b1bf19@example.com",
+        "commitHash": "3c637c25e83eaf7c628acc5b7fc45b1bf19f1bf8",
+        "commitMessage": "Release 4.4.0 (#821)",
+        "commitDate": "2022-12-22 15:36:09 -0300",
+        "rule_id": "HS-LEAKS-27",
+        "vulnHash": "28b1d46a185cfaa94caa22bbd89be7ad3ef3ee8d28fbdf53410b2be58aa9abc8",
+        "deprecatedHashes": [
+          "b260c7a9ee236c607615bac4c3f418ebbac38cf6aa4fc8b782cfdaee71d00d51",
+          "19156d11783db8c646270ebe1e80d7ffb071ded59c68599ae85a6f20a416ea84"
+        ],
+        "securityToolVersion": "",
+        "securityToolInfoUri": ""
+      }
+    }
+  ]
+}
