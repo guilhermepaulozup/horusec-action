@@ -47,9 +47,9 @@ const getReleases = async (version = "latest") => {
 /**
     Download the required horusec binary and returns it path.
 */
-module.exports = async function () {
+
+async function download() {
     const version = core.getInput("horusec-version");
-    core.debug("Testing..");
     const data = await getReleases(version);
     const horusecUrl = getRequiredVersion(data);
     core.debug(horusecUrl);
@@ -60,3 +60,5 @@ module.exports = async function () {
 
     return horusecPath;
 }
+
+module.exports = { download, getReleases, getRequiredVersion }

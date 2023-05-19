@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "prepare": "ncc build src/run.js -o dist --source-map --license licenses.txt",
-    "lint": "npx eslint src/"
+    "lint": "npx eslint",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
