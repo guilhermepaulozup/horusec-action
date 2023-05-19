@@ -15,7 +15,7 @@ async function run() {
   // adds needed project-path to the execution flag.
   core.debug("Horusec execution start.");
   try {
-    const code = await exec.exec(executable, ...getFlags());
+    const code = await exec.exec(executable, getFlags());
     core.debug("Horusec execution end.")
   } catch (err) {
     core.setFailed(err.message);

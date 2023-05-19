@@ -33,7 +33,8 @@ function getFlags() {
       flags.push(value);
     }
   }
-
+  core.debug("Active flags:");
+  core.debug(flags.slice(1));
   return flags;
 }
 
