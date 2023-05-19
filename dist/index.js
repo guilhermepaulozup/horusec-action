@@ -13437,18 +13437,19 @@ const core = __nccwpck_require__(2186);
 const tc = __nccwpck_require__(7784);
 const gh = __nccwpck_require__(5438);
 
-/* 
-    TODO: Currently fetching the required version by this code
-            isnt working. Probably should use another method than Platform and arch.
-*/
-const getRequiredVersion = ( {assets} ) => {
-    let arq = arch;
-    if (arq === "x64") arq = 'amd64'; // parses process.arch from x64 to amd64
 
-    const asset = assets
-        .find(({ name }) => name.includes(`${platform}_${arq}`));
-    if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arq}`); }
-    return asset.browser_download_url;
+
+/* 
+    Get the required 
+*/
+const findRequiredBinaryUrl = (data) => {
+  let arq = arch;
+  if (arq === "x64") arq = 'amd64'; // parses process.arch from x64 to amd64
+
+  const asset = data.assets
+    .find(({ name }) => name.includes(`${platform}_${arq}`));
+  if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arq}`); }
+  return asset.browser_download_url;
 }
 
 /**
@@ -13456,43 +13457,51 @@ const getRequiredVersion = ( {assets} ) => {
     @param {string} version The version of the binary to download.
     @returns {string} The binary download url.
 */
-const getReleases = async (version = "latest") => {
-    const octokit = gh.getOctokit(core.getInput('github-token'));
-    const fullName = {
-        owner: "ZupIT",
-        repo: "horusec"
-    };
-    
-    let data = {}
-    core.debug("Version: " + version);
-    if (version !== "latest") {
-        const resp = await octokit.rest.repos.getReleaseByTag(
-            { tag: version, ...fullName }
-        );
-        data = resp.data;
-    } else {
-        const resp = await octokit.rest.repos.getLatestRelease(fullName);
-        data = resp.data;
-    }
-    return data;
+const getAllReleases = async (version = "latest") => {
+  core.debug("Trying to get the github-token from inputs.");
+  let token = core.getInput('github-token');
+  if (!token) {
+    core.debug("Github token input not informed. Using environment variables.");
+    token = process.env.GITHUB_TOKEN;
+  }
+
+  const octokit = gh.getOctokit(process.env.GITHUB_TOKEN);
+  const fullName = { owner: "ZupIT", repo: "horusec" };
+  let data = {}
+  if (version === "latest") {
+    core.debug(`GET /repos/${owner}/${repo}/releases/latest/`);
+    const resp = await octokit.rest.repos.getLatestRelease(fullName);
+    data = resp.data;
+  } else {
+    core.debug(`GET /repos/${owner}/${repo}/releases/tags/${version}`);
+    const resp = await octokit.rest.repos.getReleaseByTag(
+      { tag: version, ...fullName }
+    );
+    data = resp.data;
+  }
+  return data;
 }
 
 /**
     Download the required horusec binary and returns it path.
 */
-module.exports = async function () {
-    const version = core.getInput("horusec-version");
-    core.debug("Testing..");
-    const data = await getReleases(version);
-    const horusecUrl = getRequiredVersion(data);
-    core.debug(horusecUrl);
-    // TODO: 
-    const horusecPath = await tc.downloadTool(horusecUrl);
-    // gives binary permission to execute.
-    fs.chmodSync(horusecPath, 0o755);
-
-    return horusecPath;
+async function download(version) {
+  // retrieve the rest api repos.releases endpoint data
+  core.debug("Requesting the Github REST API.");
+  const data = await getAllReleases(version);
+  // finds the required release for the currently runner architecture
+  core.debug("Searching the correct binary for the currently runner architecture.");
+  const horusecUrl = findRequiredBinaryUrl(data);
+  // download the binary into the runner tmp folder (RUNNER_TEMP)
+  core.debug("Binary found, downloading...");
+  const horusecPath = await tc.downloadTool(horusecUrl);
+  // gives binary permission to execute.
+  core.debug("Giving binary execution permission.");
+  fs.chmodSync(horusecPath, 0o755);
+  return horusecPath;
 }
+
+module.exports = { download, getReleases: getAllReleases, getRequiredVersion: findRequiredBinaryUrl }
 
 
 /***/ }),
@@ -13504,66 +13513,42 @@ module.exports = async function () {
 
 
 const core = __nccwpck_require__(2186);
-const inputs = {
-    "analysis-timeout": {
-        type: "number",
-    },
-    "config-file-path": {
-        type: "string",
-    },
-    "certificate-path": {
-        type: "string",
-    },
-    "ignore-severity": {
-        type: "string",
-    },
-    "ignore": {
-        type: "string",
-    },
-    "enable-commit-author": {
-        type: "boolean",
-    },
-    "enable-git-history": {
-        type: "boolean",
-    },
-    "enable-owasp-dependency-check": {
-        type: "boolean",
-    },
-    "enable-shellcheck": {
-        type: "boolean",
-    },
-};
-
-function parseInputType(input, value) {
-    if (!value) return;
-    try {
-        if (input.type === "boolean") return Boolean(value);
-        else if (input.type === "number") return Number(value);
-        else return String(value);
-    } catch (err) {
-        core.error(err);
-        throw new Error(`Invalid value for ${input}: ${value}`);
-    }
-}
+const inputs = [
+    "analysis-timeout",
+    "log-level",
+    "config-file-path",
+    "certificate-path",
+    "ignore-severity",
+    "ignore",
+    "enable-commit-author",
+    "enable-git-history",
+    "enable-owasp-dependency-check",
+    "enable-shellcheck",
+];
 
 /**
     Get the action flags.
 */
 function getFlags() {
-    const flags = [];
-
+    const flags = [
+        "start",
+        "-o", "json",
+        "-O", "horusec.json",
+        "--project-path", core.getInput('project-path', {required: true})
+    ];
     // grabs all inputs based on "flags" array.
-    for (let input of Object.keys(inputs)) {
-        const value = parseInputType(input, core.getInput(input));
+    core.debug("Reading all flags from the flags array.");
+    for (let input of inputs) {
+        const value = core.getInput(input);
         if (value) {
             flags.push(`--${input}`);
             flags.push(value);
         }
     }
-
+    
     return flags;
 }
-module.exports = getFlags;
+module.exports = { getFlags };
 
 /***/ }),
 
@@ -13785,25 +13770,20 @@ const download = __nccwpck_require__(7129);
     Run function setup the required flags, horusec version and execute.
 */
 async function run() {
-    // grabs all action inputs.
-    core.info("Getting action inputs.");
+    // gets the horusec-version input value.
+    const version = core.getInput("horusec-version");
+    core.info(`INFO: Required horusec version: ${version}.`);
     // downloads the horusec binary.
-    core.info("Downloading required Horusec binary.")
-    const executable = await download();
+    const executable = await download(version);
     // adds needed project-path to the execution flag.
-    const flags = [
-        "--project-path", core.getInput('project-path', {required: true}),
-        ...getFlags()
-    ]
-    // execute the horusec cli using the flags.
+    core.debug("Horusec execution start.");
     try {
-        const code = await exec.exec(executable, ["start", ...flags]);
-        core.ExitCode = code;
+        const code = await exec.exec(executable, ...getFlags());
+        core.debug("Horusec execution end.")
     } catch (err) {
         core.setFailed(err.message);
     }
-};
-
+}
 
 run();
 
