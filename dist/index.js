@@ -13805,7 +13805,7 @@ async function run() {
     // execute the horusec cli using the flags.
     core.info("Executing Horusec...");
     try {
-        const code = await exec.exec(executable, ["start", flags]);
+        const code = await exec.exec(executable, ["start", ...flags]);
         core.info("Horusec finished the analysis in your code..");    
         core.ExitCode = code;
     } catch (err) {
