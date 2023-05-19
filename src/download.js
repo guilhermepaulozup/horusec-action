@@ -9,6 +9,8 @@ const gh = require("@actions/github");
             isnt working. Probably should use another method than Platform and arch.
 */
 const getRequiredVersion = ( {assets} ) => {
+    if (arch === "x64") arch = 'amd64'; // parses process.arch from x64 to amd64
+
     const asset = assets
         .find(({ name }) => name.includes(`${platform}_${arch}`));
     if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arch}`); }

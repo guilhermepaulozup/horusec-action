@@ -13443,8 +13443,8 @@ const gh = __nccwpck_require__(5438);
 */
 const getRequiredVersion = ( {assets} ) => {
     const asset = assets
-        .find(({ name }) => name.includes(`${platform}_${arch}`));
-    if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arch}`); }
+        .find(({ name }) => name.includes(`linux_x86`));
+    if (!asset) { throw new Error(`Failed to find binary for: linux_x86`); }
     return asset.browser_download_url;
 }
 
