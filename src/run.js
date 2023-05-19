@@ -12,18 +12,14 @@ async function run() {
     // downloads the horusec binary.
     core.info("Downloading required Horusec binary.")
     const executable = await download();
-    // TODO: Exec function isnt parsing the project path correctly in pipeline.
+    // adds needed project-path to the execution flag.
     const flags = [
         "--project-path", core.getInput('project-path', {required: true}),
         ...getFlags()
     ]
-    core.debug("Flags: " + flags);
-
     // execute the horusec cli using the flags.
-    core.info("Executing Horusec...");
     try {
         const code = await exec.exec(executable, ["start", ...flags]);
-        core.info("Horusec finished the analysis in your code..");    
         core.ExitCode = code;
     } catch (err) {
         core.setFailed(err.message);

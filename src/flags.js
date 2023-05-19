@@ -33,13 +33,14 @@ const inputs = {
 
 function parseInputType(input, value) {
     if (!value) return;
-    if (input.type !== typeof value) {
-        throw new Error(`Invalid input for ${input}: ${value}`);
+    try {
+        if (input.type === "boolean") return Boolean(value);
+        else if (input.type === "number") return Number(value);
+        else return String(value);
+    } catch (err) {
+        core.error(err);
+        throw new Error(`Invalid value for ${input}: ${value}`);
     }
-
-    if (input.type === "boolean") return Boolean(value);
-    else if (input.type === "number") return Number(value);
-    else return String(value);
 }
 
 /**

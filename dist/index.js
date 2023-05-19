@@ -13536,13 +13536,14 @@ const inputs = {
 
 function parseInputType(input, value) {
     if (!value) return;
-    if (input.type !== typeof value) {
-        throw new Error(`Invalid input for ${input}: ${value}`);
+    try {
+        if (input.type === "boolean") return Boolean(value);
+        else if (input.type === "number") return Number(value);
+        else return String(value);
+    } catch (err) {
+        core.error(err);
+        throw new Error(`Invalid value for ${input}: ${value}`);
     }
-
-    if (input.type === "boolean") return Boolean(value);
-    else if (input.type === "number") return Number(value);
-    else return String(value);
 }
 
 /**
@@ -13789,18 +13790,14 @@ async function run() {
     // downloads the horusec binary.
     core.info("Downloading required Horusec binary.")
     const executable = await download();
-    // TODO: Exec function isnt parsing the project path correctly in pipeline.
+    // adds needed project-path to the execution flag.
     const flags = [
         "--project-path", core.getInput('project-path', {required: true}),
         ...getFlags()
     ]
-    core.debug("Flags: " + flags);
-
     // execute the horusec cli using the flags.
-    core.info("Executing Horusec...");
     try {
         const code = await exec.exec(executable, ["start", ...flags]);
-        core.info("Horusec finished the analysis in your code..");    
         core.ExitCode = code;
     } catch (err) {
         core.setFailed(err.message);
