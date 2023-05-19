@@ -37,8 +37,9 @@ const inputs = {
 };
 
 function parseInputType(input, value) {
+    if (!value) return;
     if (input.type !== typeof value) {
-        
+        throw new Error(`Invalid input for ${input}: ${value}`);
     }
 
     if (input.type === "boolean") return Boolean(value);
@@ -55,7 +56,10 @@ function getFlags() {
     // grabs all inputs based on "flags" array.
     for (let input of Object.keys(inputs)) {
         const value = parseInputType(input, core.getInput(input));
-        if (value) flags.push(`--${input}=${value}`);
+        if (value) {
+            flags.push(`--${input}`);
+            flags.push(value);
+        }
     }
 
     return flags;
