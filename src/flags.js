@@ -4,35 +4,30 @@ const core = require('@actions/core');
 const inputs = {
     "analysis-timeout": {
         type: "number",
-        value: "",
+    },
+    "config-file-path": {
+        type: "string",
     },
     "certificate-path": {
         type: "string",
-        value: "",
     },
     "ignore-severity": {
         type: "string",
-        value: "",
     },
     "ignore": {
         type: "string",
-        value: "",
     },
     "enable-commit-author": {
         type: "boolean",
-        value: "",
     },
     "enable-git-history": {
         type: "boolean",
-        value: "",
     },
     "enable-owasp-dependency-check": {
         type: "boolean",
-        value: "",
     },
     "enable-shellcheck": {
         type: "boolean",
-        value: "",
     },
 };
 

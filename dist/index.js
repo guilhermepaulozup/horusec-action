@@ -13507,35 +13507,30 @@ const core = __nccwpck_require__(2186);
 const inputs = {
     "analysis-timeout": {
         type: "number",
-        value: "",
+    },
+    "config-file-path": {
+        type: "string",
     },
     "certificate-path": {
         type: "string",
-        value: "",
     },
     "ignore-severity": {
         type: "string",
-        value: "",
     },
     "ignore": {
         type: "string",
-        value: "",
     },
     "enable-commit-author": {
         type: "boolean",
-        value: "",
     },
     "enable-git-history": {
         type: "boolean",
-        value: "",
     },
     "enable-owasp-dependency-check": {
         type: "boolean",
-        value: "",
     },
     "enable-shellcheck": {
         type: "boolean",
-        value: "",
     },
 };
 
@@ -13797,7 +13792,6 @@ async function run() {
     // TODO: Exec function isnt parsing the project path correctly in pipeline.
     const flags = [
         "--project-path", core.getInput('project-path', {required: true}),
-        "--config-file-path", core.getInput('config-file-path', {required: true}),
         ...getFlags()
     ]
     core.debug("Flags: " + flags);

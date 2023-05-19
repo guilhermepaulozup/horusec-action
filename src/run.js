@@ -15,7 +15,6 @@ async function run() {
     // TODO: Exec function isnt parsing the project path correctly in pipeline.
     const flags = [
         "--project-path", core.getInput('project-path', {required: true}),
-        "--config-file-path", core.getInput('config-file-path', {required: true}),
         ...getFlags()
     ]
     core.debug("Flags: " + flags);

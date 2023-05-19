@@ -32,8 +32,8 @@ inputs:
     default: "."
   config-file-path:
     description: Horusec config file path. Default to repository root.
-    required: true
-    default: "."
+    required: false
+    default: null
 
   ### Boolean inputs
   enable-commit-author:
