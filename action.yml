@@ -40,6 +40,7 @@ inputs:
     default: false
   ignore-severity:
     description: The level of vulnerabilities to ignore in the output (LOW|MEDIUM|HIGH). Example -s="LOW, HIGH" (default [INFO]).
+    type: string
     required: false
     default: null
   project-path:

@@ -24,7 +24,7 @@ module.exports = function () {
     for (let input of inputs) {
         const value = core.getInput(input);
         core.debug(`--${input}="${value}"`);
-        if (value) flags.push(`--${input}=${value}`)
+        if (value) flags.push(`--${input}=\"${value}\"`);
     }
 
     return flags;
