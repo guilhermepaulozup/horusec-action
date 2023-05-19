@@ -28,12 +28,12 @@ inputs:
     default: null
   project-path:
     description: Path to run an analysis. Default to the repository root.
-    required: false
-    default: ""
+    required: true
+    default: "."
   config-file-path:
     description: Horusec config file path. Default to repository root.
-    required: false
-    default: ""
+    required: true
+    default: "."
 
   ### Boolean inputs
   enable-commit-author:
