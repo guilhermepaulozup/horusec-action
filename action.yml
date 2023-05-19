@@ -39,23 +39,23 @@ inputs:
   enable-commit-author:
     description: Enable to search commit author of vulnerabilities.
     required: false
-    default: false
+    default: null
   enable-git-history:
     description: Run Gitleaks and search for vulnerabilities in all git history of the project https://github.com/zricethezav/gitleaks
     required: false
-    default: false
+    default: null
   enable-owasp-dependency-check:
     description: Run Owasp Dependency Check tool https://github.com/jeremylong/DependencyCheck
     required: false
-    default: false
+    default: null
   enable-shellcheck:
     description: Run ShellCheck tool https://github.com/koalaman/shellcheck
     required: false
-    default: false
+    default: null
   return-error:
     description: If the execution should return Error if vulnerabilities are found.
     required: false
-    default: false
+    default: null
 
   ### Array inputs (strings separated by ",")
   ignore-severity:

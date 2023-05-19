@@ -13504,7 +13504,7 @@ module.exports = async function () {
 
 
 const core = __nccwpck_require__(2186);
-const extraFlags = [
+const inputs = [
     "analysis-timeout",
     "certificate-path",
     "enable-commit-author",
@@ -13513,7 +13513,7 @@ const extraFlags = [
     "enable-shellcheck",
     "ignore-severity",
     "ignore",
-]
+];
 
 /**
     Get the action flags.
@@ -13522,9 +13522,9 @@ function getFlags() {
     const flags = [];
 
     // grabs all inputs based on "flags" array.
-    for (let input of extraFlags) {
+    for (let input of inputs) {
         const value = core.getInput(input);
-        core.debug(`--${input}="${value}"`);
+        core.info(`Type of ${input}: ${typeof value}`);
         if (value) flags.push(`--${input}=${value}`);
     }
 
