@@ -4,18 +4,19 @@ const core = require('@actions/core');
 const tc = require("@actions/tool-cache");
 const gh = require("@actions/github");
 
-
-
 /*
     Find the correct binary for the runner architecture.
 */
 const findRequiredBinaryUrl = (assets) => {
   let arq = arch;
+  console.log(platform + " _ " + arch);
   if (arq === "x64") arq = 'amd64'; // parses process.arch from x64 to amd64
-
   const asset = assets
     .find(({ name }) => name.includes(`${platform}_${arq}`));
-  if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arq}`); }
+  if (!asset) {
+    core.setFailed(`Failed to find binary for: ${platform}_${arq}`);
+    throw new Error(`Failed to find binary for: ${platform}_${arq}`);
+  }
   return asset.browser_download_url;
 }
 

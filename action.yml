@@ -6,7 +6,6 @@ inputs:
   github-token:
     description: The github token to use when fetching the horusec binary.
     required: false
-    default: null
     
   horusec-version:
     description: The required Horusec CLI version to use. Default to latest.
@@ -17,24 +16,18 @@ inputs:
     description: Print horusec vulnerabilities to summary.
     required: false
     default: false
-  
+
   # Horusec CLI inputs.
 
-  ### Numeric inputs
   analysis-timeout:
     description: The timeout threshold for the Horusec CLI wait for the analysis to complete. The minimum time is 10 (default to 600 cli).
     required: false
-    default: null
-
-  ### String inputs
   log-level:
     description: Set log level ("panic"|"fatal"|"error"|"warn"|"info"|"debug"|"trace") (default "info")
     required: false
-    default: null
   certificate-path:
     description: Path to certificate of authority. Example example/ca.crt.
     required: false
-    default: null
   project-path:
     description: Path to run an analysis. Default to the repository root.
     required: true
@@ -42,37 +35,30 @@ inputs:
   config-file-path:
     description: Horusec config file path. Default to repository root.
     required: false
-    default: null
   ignore-severity:
     description: The level of vulnerabilities to ignore in the output (LOW|MEDIUM|HIGH). Example -s="LOW, HIGH" (default [INFO]).
     required: false
-    default: null
   ignore:
     description: Paths to ignore in the analysis. Example -i="/path/to/ignore, **/*_test.go, **/assets/**" (default [*tmp*,**/.vscode/**])
     required: false
-    default: null
 
   ### Boolean inputs
   enable-commit-author:
     description: Enable to search commit author of vulnerabilities.
     required: false
-    default: null
+    default: false
   enable-git-history:
     description: Run Gitleaks and search for vulnerabilities in all git history of the project https://github.com/zricethezav/gitleaks
     required: false
-    default: null
+    default: false
   enable-owasp-dependency-check:
     description: Run Owasp Dependency Check tool https://github.com/jeremylong/DependencyCheck
     required: false
-    default: null
+    default: false
   enable-shellcheck:
     description: Run ShellCheck tool https://github.com/koalaman/shellcheck
     required: false
-    default: null
-  return-error:
-    description: If the execution should return Error if vulnerabilities are found.
-    required: false
-    default: null
+    default: false
 
 runs:
   using: 'node16'

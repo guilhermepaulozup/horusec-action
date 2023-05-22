@@ -23,6 +23,7 @@ async function run() {
   if (useSummary) {
     flags.push(...["-o", "json", "-O", "horusec-report.json"]);
   }
+
   try {
     const code = await exec.exec(executable, execFlags);
     core.debug("Horusec execution end.");
