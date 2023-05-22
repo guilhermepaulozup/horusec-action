@@ -13437,18 +13437,19 @@ const core = __nccwpck_require__(2186);
 const tc = __nccwpck_require__(7784);
 const gh = __nccwpck_require__(5438);
 
-
-
 /*
     Find the correct binary for the runner architecture.
 */
 const findRequiredBinaryUrl = (assets) => {
   let arq = arch;
+  console.log(platform + " _ " + arch);
   if (arq === "x64") arq = 'amd64'; // parses process.arch from x64 to amd64
-
   const asset = assets
     .find(({ name }) => name.includes(`${platform}_${arq}`));
-  if (!asset) { throw new Error(`Failed to find binary for: ${platform}_${arq}`); }
+  if (!asset) {
+    core.setFailed(`Failed to find binary for: ${platform}_${arq}`);
+    throw new Error(`Failed to find binary for: ${platform}_${arq}`);
+  }
   return asset.browser_download_url;
 }
 
@@ -13525,18 +13526,22 @@ module.exports = { download, getAllReleases, findRequiredBinaryUrl}
 
 
 const core = __nccwpck_require__(2186);
-const inputs = [
-  "analysis-timeout",
-  "log-level",
-  "config-file-path",
-  "certificate-path",
-  "ignore-severity",
-  "ignore",
-  "enable-commit-author",
-  "enable-git-history",
-  "enable-owasp-dependency-check",
-  "enable-shellcheck",
-];
+const inputs = {
+  string: [
+    "analysis-timeout",
+    "log-level",
+    "config-file-path",
+    "certificate-path",
+    "ignore-severity",
+    "ignore",
+  ],
+  boolean: [
+    "enable-commit-author",
+    "enable-git-history",
+    "enable-owasp-dependency-check",
+    "enable-shellcheck",
+  ]
+};
 
 
 /**
@@ -13545,21 +13550,28 @@ const inputs = [
 function getFlags() {
   const flags = [
     "start",
-    "--project-path", core.getInput('project-path', { required: true })
+    "--project-path", core.getInput('project-path', { required: true }),
+    "--return-error",
   ];
 
   // grabs all inputs based on "flags" array.
-  core.debug("Reading all flags from the flags array.");
-  for (let input of inputs) {
+  core.debug("Reading string flags.");
+  for (let input of inputs.string) {
     const value = core.getInput(input);
     if (value) {
       flags.push(`--${input}`);
       flags.push(value);
     }
   }
+  core.debug("Reading boolean flags.");
+  for (let input of inputs.boolean) {
+    const value = core.getBooleanInput(input);
+    if (value) {
+      flags.push(`--${input}`)
+    }
+  }
 
-  core.debug("Active flags:");
-  core.debug(flags.slice(1));
+  core.debug("Active flags:\n" + flags.slice(1));
   return flags;
 }
 
@@ -13570,26 +13582,57 @@ module.exports = { getFlags };
 /***/ 7259:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+const fs = __nccwpck_require__(7147);
 const core = __nccwpck_require__(2186);
+
+const _validateFileInput = (file, extension) => {
+  const fileTypeAllowList = ['.json'];
+  const fileNameSubStr = file.substring(0,file.index('.'));
+
+  
+  const rg = new RegExp(/^[\w,\s-]+\.[A-Za-z]{3,4}$/g);
+  const isValidExtension = fileTypeAllowList.includes(extension);
+  const isValidFileName = rg.test(fileNameSubStr);
+
+  if (isValidExtension && isValidFileName) {
+    return `${fileNameSubStr}.${extension}`;
+  }
+  throw new Error("Invalid file input.")
+}
+
+const readReport = (file='horusec-scan.json', format='json') => {
+  const validFile = _validateFileInput(file, format);
+  const f = fs.readFileSync(validFile);
+  try {
+    switch(format) {
+      case 'json':
+        return JSON.parse(f);
+      default:
+        throw new Error("Invalid not implemented file format.");
+    }
+  } catch(err) {
+    throw new Error("Failed to read the report file.");
+  }
+}
 
 /**
  * Checks wether the use-summary is used.
  * @returns {boolean}
  */
-const getSummaryFlag = () => {
+const getSummaryInput = () => {
   const useSummary = core.getInput('use-summary');
-  if (useSummary && useSummary === "true") {
-    return true; 
-  }
-  return false;
+  return useSummary && useSummary === "true";
 }
 
-const buildSummary = (file = 'horusec-report.json') => {
-  // const report = JSON.parse(fs.readFileSync('horusec-report.json'));
+const buildSummary = ({file='horusec-scan.json', format='json'}) => {
+  const report = readReport(file, format);
+  
+  // core.summary.addHeading("Horusec Results");
+  
   throw new Error("Not implemented yet")
 }
 
-module.exports = { getSummaryFlag, buildSummary }
+module.exports = { getSummaryInput, buildSummary }
 
 /***/ }),
 
@@ -13827,6 +13870,7 @@ async function run() {
   if (useSummary) {
     flags.push(...["-o", "json", "-O", "horusec-report.json"]);
   }
+
   try {
     const code = await exec.exec(executable, execFlags);
     core.debug("Horusec execution end.");
