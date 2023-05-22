@@ -4,7 +4,7 @@ const exec = require("@actions/exec");
 
 const { getFlags } = require("./flags");
 const { download } = require("./download");
-const { buildSummary, getSummaryFlag } = require("./summary");
+const { buildSummary, getSummaryInput } = require("./summary");
 
 /**
     Run function setup the required flags, horusec version and execute.
@@ -19,7 +19,7 @@ async function run() {
   core.debug("Horusec execution start.");
   const execFlags = getFlags();
 
-  const useSummary = getSummaryFlag();
+  const useSummary = getSummaryInput();
   if (useSummary) {
     flags.push(...["-o", "json", "-O", "horusec-report.json"]);
   }

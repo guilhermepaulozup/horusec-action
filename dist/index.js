@@ -13851,7 +13851,7 @@ const exec = __nccwpck_require__(1514);
 
 const { getFlags } = __nccwpck_require__(5564);
 const { download } = __nccwpck_require__(7129);
-const { buildSummary, getSummaryFlag } = __nccwpck_require__(7259);
+const { buildSummary, getSummaryInput } = __nccwpck_require__(7259);
 
 /**
     Run function setup the required flags, horusec version and execute.
@@ -13866,7 +13866,7 @@ async function run() {
   core.debug("Horusec execution start.");
   const execFlags = getFlags();
 
-  const useSummary = getSummaryFlag();
+  const useSummary = getSummaryInput();
   if (useSummary) {
     flags.push(...["-o", "json", "-O", "horusec-report.json"]);
   }
