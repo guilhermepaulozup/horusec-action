@@ -25,12 +25,16 @@ async function run() {
   }
 
   try {
-    const code = await exec.exec(executable, execFlags);
+    const output = await exec.getExecOutput(executable, execFlags);
     core.debug("Horusec execution end.");
-    // TODO: Should read the useSummary flag and print the horusec report to Github Summary.
+    
     if (useSummary) {
       core.debug("Building results summary.");  
       buildSummary({file: "horusec-report.json"});
+    }
+
+    if (output.exitCode === 1) {
+      core.setFailed("analysis finished with blocking vulnerabilities");
     }
   } catch (err) {
     core.setFailed(err.message);
