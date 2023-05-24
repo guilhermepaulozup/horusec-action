@@ -10,16 +10,6 @@ const exec = require('@actions/exec');
 const _buildTableFromJson = (report) => {
   const execFlags = global.EXECUTION_FLAGS;
 
-//   const headers = [
-//     { data: "ID", header: true },
-//     { data: "Severity", header: true },
-//     { data: "Line/Column", header: true },
-//     { data: "File", header: true },
-//     { data: "Details", header: true },
-//     { data: "Type", header: true },
-//     { data: "Rule ID", header: true },
-//   ];
-  
   const headers = [
     "ID",
     "Severity",
@@ -34,11 +24,12 @@ const _buildTableFromJson = (report) => {
 
   for (let vuln of report.analysisVulnerabilities) {
     const v = vuln.vulnerabilities;
+    const fileLink = `<a href="https://github.com/${['GITHUB_REPOSITORY']}/blob/${process.env['GITHUB_REF_NAME']}/${v.file}">${v.file}</a>`; 
     const newRow = [
       v.vulnerabilityID,
       v.severity,
       `${v.line}:${v.column}`,
-      v.file,
+      fileLink,
       v.details,
       v.type,
       v.rule_id
