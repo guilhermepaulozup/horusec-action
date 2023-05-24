@@ -87,6 +87,27 @@ const _buildSummaryTable = (scanResults, format) => {
   }
 }
 
+const _countSeverities = (vulnerabilities) => {
+  const sev = {
+    CRITICAL: 0,
+    HIGH: 0,
+    MEDIUM: 0,
+    LOW: 0,
+    INFO: 0,
+    UNKNOWN: 0,
+  };
+  const severities = Object.keys(sev);
+  for (const v of vulnerabilities) {
+    const severity = v.severity;
+    if (severities.includes(severity)) {
+      sev[s.severity] += 1;
+    } else {
+      sev.UNKNOWN++;
+    }
+  }
+  return sev;
+}
+
 /**
  * Checks wether the use-summary is used.
  * @returns {boolean}
@@ -101,14 +122,22 @@ const getSummaryInput = () => {
  */
 const buildSummary = async (content, format='json') => {
   core.debug("Building summary table");
+  const severities = _countSeverities(content.analysisVulnerabilities);
   const table = _buildSummaryTable(content, format);
   core.summary
     .addHeading("&#128737; Horusec Results &#128737;")
+    .addRaw(`<strong>C</strong>: ${severities.CRITICAL} 
+    <strong>H</strong>: ${severities.HIGH} 
+    <strong>M</strong>: ${severities.MEDIUM} 
+    <strong>L</strong>: ${severities.LOW} 
+    <strong>I</strong>: ${severities.INFO} 
+    <strong></strong>: ${severities.UNKNOWN}`)
     .addDetails("Execution details.",
-`<ul><li>Scan ID: ${content.id}</li>
-<li>Horusec Version: ${content.version}</li>
-<li>Status: ${content.status}</li>
-<li>Errors: ${content.errors}</li></ul>`)
+`<ul><li><strong>Scan ID</strong>: ${content.id}</li>
+<li><strong>Horusec Version</strong>: ${content.version}</li>
+<li><strong>Status</strong>: ${content.status}</li>
+<li><strong>Errors</strong>: ${content.errors}</li></ul>
+<li>`)
     .addDetails(
         "List of vulnerabilities found by Horusec.",
         _buildSummaryTable(content, format)
