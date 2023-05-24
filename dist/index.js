@@ -13437,6 +13437,7 @@ const core = __nccwpck_require__(2186);
 const tc = __nccwpck_require__(7784);
 const gh = __nccwpck_require__(5438);
 
+
 /*
     Find the correct binary for the runner architecture.
 */
@@ -13469,7 +13470,7 @@ const getGithubTokenInput = () => {
     @returns {string} The binary download url.
 */
 const getAllReleases = async (version = "latest") => {
-  const octokit = gh.getOctokit(getGithubTokenInput());
+  const octokit = gh.getOctokit(getGithubTokenInput(), );
   const fullName = { owner: "ZupIT", repo: "horusec" };
 
   if (version === "latest") {
@@ -13577,72 +13578,99 @@ module.exports = { getFlags };
 
 /***/ }),
 
-/***/ 7259:
+/***/ 2967:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const fs = __nccwpck_require__(7147);
+const path = __nccwpck_require__(1017);
+
+class ReportReader {
+  _allowedExtensions = [".json"];
+  constructor(file) {
+    this._content = this._readScanResults(file);
+  }
+
+  /**
+   * File name to validate
+   * @param {string} file 
+   * @returns {boolean}
+   */
+  _isValidFileName(file) {
+    if (!file) return false;
+    if (file.includes('../') || file.includes('..\\')) {
+      return false;
+    }
+
+    const rg = new RegExp(/[A-Za-z0-9-_]{0,255}.[a-zA-Z]{0,5}/gi);
+    return rg.test(file);
+  }
+
+  /**
+   * 
+   * @param {string} ext 
+   * @returns 
+   */
+  _isValidFileExtension(ext) {
+    if (!ext) return false;
+    return this._allowedExtensions.includes(ext);
+  }
+
+  _validateFileInput(file) {
+    const { name, ext } = path.parse(file);
+
+    if (!this._isValidFileName(name) || !this._isValidFileExtension(ext)) {
+      throw new Error("Invalid report file input.");
+    }
+
+    return {file, ext}
+  }
+
+  _readScanResults(filePath = 'horusec-scan.json') {
+    const {file, ext} = this._validateFileInput(filePath);
+    const f = fs.readFileSync(file);
+    
+    try {
+      switch (ext) {
+        case '.json':
+          return JSON.parse(f);
+        default:
+          throw new Error("Invalid not implemented file format.");
+      }
+    } catch (err) {
+      throw new Error("Failed to read the report file.");
+    }
+  }
+
+  getContent() { return this._content; }
+}
+
+module.exports = ReportReader;
+
+/***/ }),
+
+/***/ 7259:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+
 const core = __nccwpck_require__(2186);
 const exec = __nccwpck_require__(1514);
 
-const _validateFileInput = (file, extension) => {
-  return file;
-  const fileTypeAllowList = ['.json'];
-  const fileNameSubStr = file.substring(0,file.indexOf('.'));
-
-  
-  const rg = new RegExp(/^[\w,\s-]+\.[A-Za-z]{3,4}$/g);
-  const isValidExtension = fileTypeAllowList.includes(extension);
-  const isValidFileName = rg.test(fileNameSubStr);
-
-  if (!(isValidExtension && isValidFileName)) {
-    throw new Error("Invalid file input.");
-  }
-  return `${fileNameSubStr}.${extension}`;
-}
-
-const readReport = (file='horusec-scan.json', format='json') => {
-  const validFile = _validateFileInput(file, format);
-  const f = fs.readFileSync(validFile);
-  try {
-    switch(format) {
-      case 'json':
-        return JSON.parse(f);
-      default:
-        throw new Error("Invalid not implemented file format.");
-    }
-  } catch(err) {
-    throw new Error("Failed to read the report file.");
-  }
-}
-
 /**
- * Checks wether the use-summary is used.
- * @returns {boolean}
+ * Builds a summary table out of json formatted results
+ * @param {object} report 
+ * @returns {Array[][]}
  */
-const getSummaryInput = () => {
-  return core.getBooleanInput('use-summary');
-}
-
-const buildTable = (file, format) => {
-  switch (format) {
-    case "json":
-      return _buildTableFromJson(file);
-    default:
-      return _buildTableFromJson(file);
-  }
-}
-
 const _buildTableFromJson = (report) => {
   const headers = [
-    {data: "ID", header: true},
-    {data: "Severity", header: true},
-    {data: "Line/Column", header: true},
-    {data: "File", header: true},
-    {data: "Details", header: true},
-    {data: "Type", header: true},
-    {data: "Rule ID", header: true},
-    {data: "Commit Author", header: true},
-    {data: "Commit Date", header: true},
+    { data: "ID", header: true },
+    { data: "Severity", header: true },
+    { data: "Line/Column", header: true },
+    { data: "File", header: true },
+    { data: "Details", header: true },
+    { data: "Type", header: true },
+    { data: "Rule ID", header: true },
+    { data: "Commit Author", header: true },
+    { data: "Commit Date", header: true },
   ];
 
   const rows = [headers];
@@ -13664,31 +13692,43 @@ const _buildTableFromJson = (report) => {
   return rows;
 }
 
+
+/**
+ * Checks wether the use-summary is used.
+ * @returns {boolean}
+ */
+const getSummaryInput = () => {
+  return core.getBooleanInput('use-summary');
+}
+
+const buildTable = (scanResults, format) => {
+  switch (format) {
+    case ".json":
+      return _buildTableFromJson(scanResults);
+    default:
+      return _buildTableFromJson(scanResults);
+  }
+}
+
 /**
  * Builds the action summary with the results of the scan
- * @param {*} param0 
+ * @param {object} - The file and format to build the summary.
  */
-const buildSummary = async ({file='horusec-scan.json', format='json'}) => {
-  core.debug(`Reading file: ${file}`);
-  const report = readReport(file, format);
-  core.debug(typeof report.analysisVulnerabilities);
-  const output = await exec.getExecOutput('cat', [file]);
-  core.debug(output);
+const buildSummary = async (content, format='json') => {
   core.debug("Building summary table");
-  const table = buildTable(file, format);
+  const table = buildTable(content, format);
 
   core.summary
-      .addHeading("Horusec Results")
-      .addBreak()
-      .addDetails(`
-      List of vulnerabilities found by horusec in the current directory.
-        - Scan ID: ${report.id};
-        - Horusec Version: ${report.version};
-        - Status: ${report.status};
-        - Scan date: ${report.finishedAt};
-      `)
-      .addTable(table)
-      .write();
+    .addHeading("&#128737; Horusec Results &#128737;")
+    .addDetails("Execution details.",
+    `- Scan ID: ${content.id};
+    - Horusec Version: ${content.version};
+    - Status: ${content.status};
+    - Errors: ${content.errors}
+    - Scan date: ${content.finishedAt};`)
+    .addRaw("List of vulnerabilities found by Horusec.")
+    .addTable(table)
+    .write();
 }
 
 
@@ -13915,6 +13955,8 @@ const exec = __nccwpck_require__(1514);
 const { getFlags } = __nccwpck_require__(5564);
 const { download } = __nccwpck_require__(7129);
 const { buildSummary, getSummaryInput } = __nccwpck_require__(7259);
+const ReportReader = __nccwpck_require__(2967);
+
 
 /**
     Run function setup the required flags, horusec version and execute.
@@ -13933,14 +13975,14 @@ async function run() {
   if (useSummary) {
     execFlags.push(...["-o", "json", "-O", "horusec-report.json"]);
   }
-
   try {
     const output = await exec.getExecOutput(executable, execFlags);
     core.debug("Horusec execution end.");
     
     if (useSummary) {
-      core.debug("Building results summary.");  
-      buildSummary({file: "horusec-report.json"});
+      core.debug("Building results summary.");
+      const reader = new ReportReader("horusec-report.json");
+      buildSummary(reader.getContent(), "json");
     }
 
     if (output.exitCode === 1) {

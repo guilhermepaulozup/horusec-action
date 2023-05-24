@@ -1,0 +1,21 @@
+name: Horusec Action
+
+on: push
+
+jobs:
+    execute:
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+            - name: Horusec
+              continue-on-error: true
+              uses: ./
+              env:
+                # Needed for local debug
+                NODE_TLS_REJECT_UNAUTHORIZED: 0
+              with:
+                github-token: ${{github.token}}
+                use-summary: true
+

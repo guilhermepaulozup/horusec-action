@@ -1,66 +1,23 @@
-const fs = require('fs');
-const core = require("@actions/core");
-const exec = require("@actions/exec");
 
-const _validateFileInput = (file, extension) => {
-  return file;
-  const fileTypeAllowList = ['.json'];
-  const fileNameSubStr = file.substring(0,file.indexOf('.'));
-
-  
-  const rg = new RegExp(/^[\w,\s-]+\.[A-Za-z]{3,4}$/g);
-  const isValidExtension = fileTypeAllowList.includes(extension);
-  const isValidFileName = rg.test(fileNameSubStr);
-
-  if (!(isValidExtension && isValidFileName)) {
-    throw new Error("Invalid file input.");
-  }
-  return `${fileNameSubStr}.${extension}`;
-}
-
-const readReport = (file='horusec-scan.json', format='json') => {
-  const validFile = _validateFileInput(file, format);
-  const f = fs.readFileSync(validFile);
-  try {
-    switch(format) {
-      case 'json':
-        return JSON.parse(f);
-      default:
-        throw new Error("Invalid not implemented file format.");
-    }
-  } catch(err) {
-    throw new Error("Failed to read the report file.");
-  }
-}
+const core = require('@actions/core');
+const exec = require('@actions/exec');
 
 /**
- * Checks wether the use-summary is used.
- * @returns {boolean}
+ * Builds a summary table out of json formatted results
+ * @param {object} report 
+ * @returns {Array[][]}
  */
-const getSummaryInput = () => {
-  return core.getBooleanInput('use-summary');
-}
-
-const buildTable = (file, format) => {
-  switch (format) {
-    case "json":
-      return _buildTableFromJson(file);
-    default:
-      return _buildTableFromJson(file);
-  }
-}
-
 const _buildTableFromJson = (report) => {
   const headers = [
-    {data: "ID", header: true},
-    {data: "Severity", header: true},
-    {data: "Line/Column", header: true},
-    {data: "File", header: true},
-    {data: "Details", header: true},
-    {data: "Type", header: true},
-    {data: "Rule ID", header: true},
-    {data: "Commit Author", header: true},
-    {data: "Commit Date", header: true},
+    { data: "ID", header: true },
+    { data: "Severity", header: true },
+    { data: "Line/Column", header: true },
+    { data: "File", header: true },
+    { data: "Details", header: true },
+    { data: "Type", header: true },
+    { data: "Rule ID", header: true },
+    { data: "Commit Author", header: true },
+    { data: "Commit Date", header: true },
   ];
 
   const rows = [headers];
@@ -82,31 +39,43 @@ const _buildTableFromJson = (report) => {
   return rows;
 }
 
+
+/**
+ * Checks wether the use-summary is used.
+ * @returns {boolean}
+ */
+const getSummaryInput = () => {
+  return core.getBooleanInput('use-summary');
+}
+
+const buildTable = (scanResults, format) => {
+  switch (format) {
+    case ".json":
+      return _buildTableFromJson(scanResults);
+    default:
+      return _buildTableFromJson(scanResults);
+  }
+}
+
 /**
  * Builds the action summary with the results of the scan
- * @param {*} param0 
+ * @param {object} - The file and format to build the summary.
  */
-const buildSummary = async ({file='horusec-scan.json', format='json'}) => {
-  core.debug(`Reading file: ${file}`);
-  const report = readReport(file, format);
-  core.debug(typeof report.analysisVulnerabilities);
-  const output = await exec.getExecOutput('cat', [file]);
-  core.debug(output);
+const buildSummary = async (content, format='json') => {
   core.debug("Building summary table");
-  const table = buildTable(file, format);
+  const table = buildTable(content, format);
 
   core.summary
-      .addHeading("Horusec Results")
-      .addBreak()
-      .addDetails(`
-      List of vulnerabilities found by horusec in the current directory.
-        - Scan ID: ${report.id};
-        - Horusec Version: ${report.version};
-        - Status: ${report.status};
-        - Scan date: ${report.finishedAt};
-      `)
-      .addTable(table)
-      .write();
+    .addHeading("&#128737; Horusec Results &#128737;")
+    .addDetails("Execution details.",
+    `- Scan ID: ${content.id};
+    - Horusec Version: ${content.version};
+    - Status: ${content.status};
+    - Errors: ${content.errors}
+    - Scan date: ${content.finishedAt};`)
+    .addRaw("List of vulnerabilities found by Horusec.")
+    .addTable(table)
+    .write();
 }
 
 

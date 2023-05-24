@@ -4,6 +4,7 @@ const core = require('@actions/core');
 const tc = require("@actions/tool-cache");
 const gh = require("@actions/github");
 
+
 /*
     Find the correct binary for the runner architecture.
 */
@@ -36,7 +37,7 @@ const getGithubTokenInput = () => {
     @returns {string} The binary download url.
 */
 const getAllReleases = async (version = "latest") => {
-  const octokit = gh.getOctokit(getGithubTokenInput());
+  const octokit = gh.getOctokit(getGithubTokenInput(), );
   const fullName = { owner: "ZupIT", repo: "horusec" };
 
   if (version === "latest") {
