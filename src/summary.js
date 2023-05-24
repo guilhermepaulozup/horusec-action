@@ -75,6 +75,7 @@ const _buildTable = (headers, rows) => {
   }
 
   table += "</table>"
+  return table;
 }
 
 const _buildSummaryTable = (scanResults, format) => {
@@ -101,23 +102,18 @@ const getSummaryInput = () => {
 const buildSummary = async (content, format='json') => {
   core.debug("Building summary table");
   const table = _buildSummaryTable(content, format);
-  const usedFlags = global.EXECUTION_FLAGS.filter((f) => f.startsWith('--'));
   core.summary
     .addHeading("&#128737; Horusec Results &#128737;")
-    .addDetails("Execution details.", `
-      <ul>\n
-        <li>Scan ID: ${content.id}</li>\n
-        <li>Horusec Version: ${content.version}</li>\n
-        <li>Status: ${content.status}</li>\n
-        <li>Errors: ${content.errors}</li>\n
-        <li>Flags: ${usedFlags}</li>\n
-      </ul>\n
-    `)
+    .addDetails("Execution details.",
+`<ul><li>Scan ID: ${content.id}</li>
+<li>Horusec Version: ${content.version}</li>
+<li>Status: ${content.status}</li>
+<li>Errors: ${content.errors}</li></ul>`)
     .addDetails(
         "List of vulnerabilities found by Horusec.",
         _buildSummaryTable(content, format)
     )
-    core.summary.write();
+    await core.summary.write();
 }
 
 module.exports = { getSummaryInput, buildSummary }
