@@ -39,16 +39,7 @@ const _buildTableFromJson = (report) => {
   return rows;
 }
 
-
-/**
- * Checks wether the use-summary is used.
- * @returns {boolean}
- */
-const getSummaryInput = () => {
-  return core.getBooleanInput('use-summary');
-}
-
-const buildTable = (scanResults, format) => {
+const _buildTable = (scanResults, format) => {
   switch (format) {
     case ".json":
       return _buildTableFromJson(scanResults);
@@ -58,27 +49,33 @@ const buildTable = (scanResults, format) => {
 }
 
 /**
+ * Checks wether the use-summary is used.
+ * @returns {boolean}
+ */
+const getSummaryInput = () => {
+  return core.getBooleanInput('use-summary');
+}
+
+/**
  * Builds the action summary with the results of the scan
  * @param {object} - The file and format to build the summary.
  */
 const buildSummary = async (content, format='json') => {
   core.debug("Building summary table");
-  const table = buildTable(content, format);
+  const table = _buildTable(content, format);
 
   core.summary
     .addHeading("&#128737; Horusec Results &#128737;")
-    .addDetails("Execution details.",
-    `- Scan ID: ${content.id};
-    - Horusec Version: ${content.version};
-    - Status: ${content.status};
-    - Errors: ${content.errors}
-    - Scan date: ${content.finishedAt};`)
+    .addRaw("Execution details.")
+    .addList([
+        `Scan ID: ${content.id}`,
+        `Horusec Version: ${content.version}`,
+        `Status: ${content.status}`,
+        `Errors: ${content.errors}`,
+      ])
     .addRaw("List of vulnerabilities found by Horusec.")
     .addTable(table)
     .write();
 }
 
-
-
 module.exports = { getSummaryInput, buildSummary }
-
