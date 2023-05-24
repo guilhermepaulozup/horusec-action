@@ -13582,6 +13582,7 @@ module.exports = { getFlags };
 
 const fs = __nccwpck_require__(7147);
 const core = __nccwpck_require__(2186);
+const exec = __nccwpck_require__(1514);
 
 const _validateFileInput = (file, extension) => {
   return file;
@@ -13667,10 +13668,12 @@ const _buildTableFromJson = (report) => {
  * Builds the action summary with the results of the scan
  * @param {*} param0 
  */
-const buildSummary = ({file='horusec-scan.json', format='json'}) => {
+const buildSummary = async ({file='horusec-scan.json', format='json'}) => {
   core.debug(`Reading file: ${file}`);
   const report = readReport(file, format);
   core.debug(typeof report.analysisVulnerabilities);
+  const output = await exec.getExecOutput('cat', [file]);
+  core.debug(output);
   core.debug("Building summary table");
   const table = buildTable(file, format);
 
@@ -13691,6 +13694,7 @@ const buildSummary = ({file='horusec-scan.json', format='json'}) => {
 
 
 module.exports = { getSummaryInput, buildSummary }
+
 
 
 /***/ }),
