@@ -13584,6 +13584,7 @@ const fs = __nccwpck_require__(7147);
 const core = __nccwpck_require__(2186);
 
 const _validateFileInput = (file, extension) => {
+  return file;
   const fileTypeAllowList = ['.json'];
   const fileNameSubStr = file.substring(0,file.indexOf('.'));
 

@@ -2,6 +2,7 @@ const fs = require('fs');
 const core = require("@actions/core");
 
 const _validateFileInput = (file, extension) => {
+  return file;
   const fileTypeAllowList = ['.json'];
   const fileNameSubStr = file.substring(0,file.indexOf('.'));
 
