@@ -13587,17 +13587,17 @@ const core = __nccwpck_require__(2186);
 
 const _validateFileInput = (file, extension) => {
   const fileTypeAllowList = ['.json'];
-  const fileNameSubStr = file.substring(0,file.index('.'));
+  const fileNameSubStr = file.substring(0,file.indexOf('.'));
 
   
   const rg = new RegExp(/^[\w,\s-]+\.[A-Za-z]{3,4}$/g);
   const isValidExtension = fileTypeAllowList.includes(extension);
   const isValidFileName = rg.test(fileNameSubStr);
 
-  if (isValidExtension && isValidFileName) {
-    return `${fileNameSubStr}.${extension}`;
+  if (!(isValidExtension && isValidFileName)) {
+    throw new Error("Invalid file input.");
   }
-  throw new Error("Invalid file input.")
+  return `${fileNameSubStr}.${extension}`;
 }
 
 const readReport = (file='horusec-scan.json', format='json') => {
