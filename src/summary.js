@@ -84,9 +84,9 @@ const buildSummary = async (content, format='json') => {
         `Errors: ${content.errors}`,
         `Flags: ${usedFlags}`
       ])
-    .addRaw("List of vulnerabilities found by Horusec.")
-    .addTable(table);
-
+    .addDetails("List of vulnerabilities found by Horusec.",
+        core.summary.addTable(table));
+    
     core.summary.write();
 }
 

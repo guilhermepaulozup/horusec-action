@@ -13737,9 +13737,9 @@ const buildSummary = async (content, format='json') => {
         `Errors: ${content.errors}`,
         `Flags: ${usedFlags}`
       ])
-    .addRaw("List of vulnerabilities found by Horusec.")
-    .addTable(table);
-
+    .addDetails("List of vulnerabilities found by Horusec.",
+        core.summary.addTable(table));
+    
     core.summary.write();
 }
 
@@ -13981,11 +13981,11 @@ async function run() {
 
   const useSummary = getSummaryInput();
   if (useSummary) {
-    EXECUTION_FLAGS.push(...["-o", "json", "-O", "horusec-report.json"]);
+    global.EXECUTION_FLAGS.push(...["-o", "json", "-O", "horusec-report.json"]);
   }
 
   try {
-    const output = await exec.getExecOutput(executable, EXECUTION_FLAGS);
+    const output = await exec.getExecOutput(executable, global.EXECUTION_FLAGS);
     core.debug("Horusec execution end.");
     
     if (useSummary) {
