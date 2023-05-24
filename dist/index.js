@@ -13740,7 +13740,7 @@ const _buildSummaryTable = (scanResults, format) => {
   }
 }
 
-const _countSeverities = (vulnerabilities) => {
+const _countSeverities = (vulns) => {
   const sev = {
     CRITICAL: 0,
     HIGH: 0,
@@ -13750,10 +13750,10 @@ const _countSeverities = (vulnerabilities) => {
     UNKNOWN: 0,
   };
   const severities = Object.keys(sev);
-  for (const v of vulnerabilities) {
-    const severity = v.severity;
-    if (severities.includes(severity)) {
-      sev[s.severity.toString()] += 1;
+  for (const vuln of vulns) {
+    const v = vuln.vulnerabilities;
+    if (severities.includes(v.severity)) {
+      sev[v.severity] += 1;
     } else {
       sev.UNKNOWN++;
     }
@@ -13775,9 +13775,7 @@ const getSummaryInput = () => {
  */
 const buildSummary = async (content, format='json') => {
   core.debug("Building summary table");
-  const severities = _countSeverities(
-    content.analysisVulnerabilities.vulnerabilities
-  );
+  const severities = _countSeverities(content.analysisVulnerabilities);
   core.summary
     .addHeading("&#128737; Horusec Results &#128737;")
     .addRaw(`<h3>Summary results</h3>
