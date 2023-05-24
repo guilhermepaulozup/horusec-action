@@ -10,6 +10,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v2
             - name: Horusec
+              id: horusec
               continue-on-error: true
               uses: ./
               env:
@@ -18,4 +19,3 @@ jobs:
               with:
                 github-token: ${{github.token}}
                 use-summary: true
-
