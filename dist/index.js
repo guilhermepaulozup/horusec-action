@@ -13620,19 +13620,61 @@ const readReport = (file='horusec-scan.json', format='json') => {
  * @returns {boolean}
  */
 const getSummaryInput = () => {
-  const useSummary = core.getInput('use-summary');
-  return useSummary && useSummary === "true";
+  return core.getBooleanInput('use-summary');
 }
 
+/**
+ * Builds the action summary with the results of the scan
+ * @param {*} param0 
+ */
 const buildSummary = ({file='horusec-scan.json', format='json'}) => {
   const report = readReport(file, format);
+
+  const headers = [
+    {data: "ID", header: true},
+    {data: "Severity", header: true},
+    {data: "Line/Column", header: true},
+    {data: "File", header: true},
+    {data: "Details", header: true},
+    {data: "Type", header: true},
+    {data: "Rule ID", header: true},
+    {data: "Commit Author", header: true},
+    {data: "Commit Date", header: true},
+  ];
+
+  const rows = [headers];
+  for (let vuln of report.analysisVulnerabilities) {
+    const v = vuln.vulnerabilities;
+    rows.push([
+      v.vulnerabilityID,
+      v.severity,
+      `${v.line}:${v.column}`,
+      v.file,
+      v.details,
+      v.type,
+      v.rule_id,
+      v.commitEmail,
+      v.commitDate,
+    ]);
+  }
+
+  core.summary
+      .addHeading("Horusec Results")
+      .addBreak()
+      .addDetails(`
+      List of vulnerabilities found by horusec in the current directory.
+        - Scan ID: ${report.id};
+        - Horusec Version: ${report.version};
+        - Status: ${report.status};
+        - Scan date: ${report.finishedAt};
+      `)
+      .addTable(rows)
+      .write();
   
-  // core.summary.addHeading("Horusec Results");
-  
-  throw new Error("Not implemented yet")
 }
 
 module.exports = { getSummaryInput, buildSummary }
+
 
 /***/ }),
 

@@ -60,6 +60,10 @@ inputs:
     required: false
     default: false
 
+branding:
+  icon: 'shield'
+  color: 'orange'
+
 runs:
   using: 'node16'
   main: 'dist/index.js'
