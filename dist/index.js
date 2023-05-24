@@ -13910,7 +13910,7 @@ async function run() {
 
   const useSummary = getSummaryInput();
   if (useSummary) {
-    flags.push(...["-o", "json", "-O", "horusec-report.json"]);
+    execFlags.push(...["-o", "json", "-O", "horusec-report.json"]);
   }
 
   try {
