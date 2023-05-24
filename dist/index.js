@@ -13674,10 +13674,12 @@ const _buildTableFromJson = (report) => {
   ];
 
   const rows = [headers];
+  const repository = process.env['GITHUB_REPOSITORY'];
+  const ref = process.env['GITHUB_REF_NAME'];
 
   for (let vuln of report.analysisVulnerabilities) {
     const v = vuln.vulnerabilities;
-    const fileLink = `<a href="https://github.com/${['GITHUB_REPOSITORY']}/blob/${process.env['GITHUB_REF_NAME']}/${v.file}">${v.file}</a>`; 
+    const fileLink = `<a href="https://github.com/${repository}/blob/${ref}/${v.file}">${v.file}</a>`; 
     const newRow = [
       v.vulnerabilityID,
       v.severity,
