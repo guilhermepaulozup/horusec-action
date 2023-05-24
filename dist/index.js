@@ -13661,6 +13661,8 @@ const exec = __nccwpck_require__(1514);
  * @returns {Array[][]}
  */
 const _buildTableFromJson = (report) => {
+  const execFlags = global.EXECUTION_FLAGS;
+
   const headers = [
     { data: "ID", header: true },
     { data: "Severity", header: true },
@@ -13669,24 +13671,32 @@ const _buildTableFromJson = (report) => {
     { data: "Details", header: true },
     { data: "Type", header: true },
     { data: "Rule ID", header: true },
-    { data: "Commit Author", header: true },
-    { data: "Commit Date", header: true },
+    
+    
   ];
 
   const rows = [headers];
+
   for (let vuln of report.analysisVulnerabilities) {
     const v = vuln.vulnerabilities;
-    rows.push([
+    const newRow = [
       v.vulnerabilityID,
       v.severity,
       `${v.line}:${v.column}`,
       v.file,
       v.details,
       v.type,
-      v.rule_id,
-      v.commitEmail,
-      v.commitDate,
-    ]);
+      v.rule_id
+    ]
+
+    if (execFlags.includes('--enable-commit-author')) {
+      rows[0].push({ data: "Commit Author", header: true });
+      rows[0].push({ data: "Commit Date", header: true });
+      newRow.push(v.commitEmail);
+      newRow.push(v.commitDate);
+    }
+
+    rows.push(newRow);
   }
 
   return rows;
@@ -13716,7 +13726,7 @@ const getSummaryInput = () => {
 const buildSummary = async (content, format='json') => {
   core.debug("Building summary table");
   const table = _buildTable(content, format);
-
+  const usedFlags = global.EXECUTION_FLAGS.filter((f) => f.startsWith('--'));
   core.summary
     .addHeading("&#128737; Horusec Results &#128737;")
     .addRaw("Execution details.")
@@ -13725,10 +13735,12 @@ const buildSummary = async (content, format='json') => {
         `Horusec Version: ${content.version}`,
         `Status: ${content.status}`,
         `Errors: ${content.errors}`,
+        `Flags: ${usedFlags}`
       ])
     .addRaw("List of vulnerabilities found by Horusec.")
-    .addTable(table)
-    .write();
+    .addTable(table);
+
+    core.summary.write();
 }
 
 module.exports = { getSummaryInput, buildSummary }
@@ -13953,7 +13965,6 @@ const { download } = __nccwpck_require__(7129);
 const { buildSummary, getSummaryInput } = __nccwpck_require__(7259);
 const ReportReader = __nccwpck_require__(2967);
 
-
 /**
     Run function setup the required flags, horusec version and execute.
 */
@@ -13965,14 +13976,16 @@ async function run() {
   const executable = await download(version);
   // adds needed project-path to the execution flag.
   core.debug("Horusec execution start.");
-  const execFlags = getFlags();
+  // sets global.EXECUTION_FLAGS
+  global.EXECUTION_FLAGS = getFlags();
 
   const useSummary = getSummaryInput();
   if (useSummary) {
-    execFlags.push(...["-o", "json", "-O", "horusec-report.json"]);
+    EXECUTION_FLAGS.push(...["-o", "json", "-O", "horusec-report.json"]);
   }
+
   try {
-    const output = await exec.getExecOutput(executable, execFlags);
+    const output = await exec.getExecOutput(executable, EXECUTION_FLAGS);
     core.debug("Horusec execution end.");
     
     if (useSummary) {
