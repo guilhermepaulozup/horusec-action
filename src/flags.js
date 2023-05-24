@@ -25,7 +25,6 @@ function getFlags() {
   const flags = [
     "start",
     "--project-path", core.getInput('project-path', { required: true }),
-    "--return-error",
   ];
 
   // grabs all inputs based on "flags" array.
