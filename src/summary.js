@@ -88,7 +88,7 @@ const _buildTableFromJson = (report) => {
 const buildSummary = ({file='horusec-scan.json', format='json'}) => {
   core.debug(`Reading file: ${file}`);
   const report = readReport(file, format);
-  core.debug(Object.keys(report));
+  core.debug(typeof report.analysisVulnerabilities);
   core.debug("Building summary table");
   const table = buildTable(file, format);
 
