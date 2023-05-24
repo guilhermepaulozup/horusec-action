@@ -13753,7 +13753,7 @@ const _countSeverities = (vulnerabilities) => {
   for (const v of vulnerabilities) {
     const severity = v.severity;
     if (severities.includes(severity)) {
-      sev[s.severity] += 1;
+      sev[s.severity.toString()] += 1;
     } else {
       sev.UNKNOWN++;
     }
@@ -13775,22 +13775,25 @@ const getSummaryInput = () => {
  */
 const buildSummary = async (content, format='json') => {
   core.debug("Building summary table");
-  const severities = _countSeverities(content.analysisVulnerabilities);
-  const table = _buildSummaryTable(content, format);
+  const severities = _countSeverities(
+    content.analysisVulnerabilities.vulnerabilities
+  );
   core.summary
     .addHeading("&#128737; Horusec Results &#128737;")
-    .addRaw(`<strong>C</strong>: ${severities.CRITICAL} 
-    <strong>H</strong>: ${severities.HIGH} 
-    <strong>M</strong>: ${severities.MEDIUM} 
-    <strong>L</strong>: ${severities.LOW} 
-    <strong>I</strong>: ${severities.INFO} 
-    <strong></strong>: ${severities.UNKNOWN}`)
+    .addRaw(`<h3>Summary results</h3>
+    <span title="Critical" style="color:red">C</span>: ${severities.CRITICAL}
+    <span title="High" style="color:orange">H</span>: ${severities.HIGH} 
+    <span title="Medium" style="color:yellow">M</span>: ${severities.MEDIUM} 
+    <span title="Low" style="color:green">L</span>: ${severities.LOW} 
+    <span title="Info" style="color:blue">I</span>: ${severities.INFO} 
+    <span title="Unknown" style="color:red">U</span>: ${severities.UNKNOWN}`)
+    .addBreak()
     .addDetails("Execution details.",
 `<ul><li><strong>Scan ID</strong>: ${content.id}</li>
 <li><strong>Horusec Version</strong>: ${content.version}</li>
 <li><strong>Status</strong>: ${content.status}</li>
-<li><strong>Errors</strong>: ${content.errors}</li></ul>
-<li>`)
+<li><strong>Errors</strong>: ${content.errors}</li></ul>`)
+    .addBreak()
     .addDetails(
         "List of vulnerabilities found by Horusec.",
         _buildSummaryTable(content, format)
