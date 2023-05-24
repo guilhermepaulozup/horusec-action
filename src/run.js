@@ -29,6 +29,7 @@ async function run() {
     core.debug("Horusec execution end.");
     // TODO: Should read the useSummary flag and print the horusec report to Github Summary.
     if (useSummary) {
+      core.debug("Building results summary.");  
       buildSummary({file: "horusec-report.json"});
     }
   } catch (err) {

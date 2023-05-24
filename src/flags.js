@@ -18,7 +18,6 @@ const inputs = {
   ]
 };
 
-
 /**
     Get the action flags.
 */

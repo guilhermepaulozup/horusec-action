@@ -39,13 +39,16 @@ const getSummaryInput = () => {
   return core.getBooleanInput('use-summary');
 }
 
-/**
- * Builds the action summary with the results of the scan
- * @param {*} param0 
- */
-const buildSummary = ({file='horusec-scan.json', format='json'}) => {
-  const report = readReport(file, format);
+const buildTable = (file, format) => {
+  switch (format) {
+    case "json":
+      return _buildTableFromJson(file);
+    default:
+      return _buildTableFromJson(file);
+  }
+}
 
+const _buildTableFromJson = (report) => {
   const headers = [
     {data: "ID", header: true},
     {data: "Severity", header: true},
@@ -74,6 +77,19 @@ const buildSummary = ({file='horusec-scan.json', format='json'}) => {
     ]);
   }
 
+  return rows;
+}
+
+/**
+ * Builds the action summary with the results of the scan
+ * @param {*} param0 
+ */
+const buildSummary = ({file='horusec-scan.json', format='json'}) => {
+  core.debug(`Reading file: ${file}`);
+  const report = readReport(file, format);
+  core.debug("Building summary table");
+  const table = buildTable(file, format);
+
   core.summary
       .addHeading("Horusec Results")
       .addBreak()
@@ -84,9 +100,10 @@ const buildSummary = ({file='horusec-scan.json', format='json'}) => {
         - Status: ${report.status};
         - Scan date: ${report.finishedAt};
       `)
-      .addTable(rows)
+      .addTable(table)
       .write();
-  
 }
+
+
 
 module.exports = { getSummaryInput, buildSummary }
