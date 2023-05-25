@@ -1,5 +1,9 @@
-
+/**
+ * Return an array of flags and values.
+ * @returns 
+ */
 const getMockedTestFlagsWithValues = () => {
+  // sets the string inputs into the array
   const flags = [
     "start",
     "--project-path", process.env["INPUT_PROJECT-PATH"],
@@ -10,7 +14,8 @@ const getMockedTestFlagsWithValues = () => {
     "--ignore-severity", process.env["INPUT_IGNORE-SEVERITY"],
     "--ignore", process.env["INPUT_IGNORE"],
   ];
-
+  
+  // sets the bool inputs values
   const boolFlags = [
     process.env["INPUT_ENABLE-COMMIT-AUTHOR"] === "true" ? "--enable-commit-author" : null,
     process.env["INPUT_ENABLE-GIT-HISTORY"] === "true" ? "--enable-git-history" : null,
@@ -18,27 +23,26 @@ const getMockedTestFlagsWithValues = () => {
     process.env["INPUT_ENABLE-SHELLCHECK"] === "true" ? "--enable-shellcheck" : null,
   ];
 
+  // adds the bool flags into the flags array
   for (const f of boolFlags) if (f) flags.push(f);
+
   return flags;
 }
 
+/**
+ * Clear env of all action inputs.
+ */
 const resetActionInputs = () => {
-  delete process.env["INPUT_PROJECT-PATH"]
-  delete process.env["INPUT_GITHUB-TOKEN"]
-  delete process.env["INPUT_HORUSEC-VERSION"]
-  delete process.env["INPUT_USE-SUMMARY"]
-  delete process.env["INPUT_ANALYSIS-TIMEOUT"]
-  delete process.env["INPUT_LOG-LEVEL"]
-  delete process.env["INPUT_CERTIFICATE-PATH"]
-  delete process.env["INPUT_CONFIG-FILE-PATH"]
-  delete process.env["INPUT_IGNORE-SEVERITY"]
-  delete process.env["INPUT_IGNORE"]
-  delete process.env["INPUT_ENABLE-COMMIT-AUTHOR"]
-  delete process.env["INPUT_ENABLE-GIT-HISTORY"]
-  delete process.env["INPUT_ENABLE-OWASP-DEPENDENCY-CHECK"]
-  delete process.env["INPUT_ENABLE-SHELLCHECK"]
+  const inputs = Object.keys(process.env);
+  inputs.forEach((i) => {
+    i.startsWith('INPUT_')
+    delete process.env[i]
+  });
 }
 
+/**
+ * Sets the action inputs as env vars with the default values defined in action.yml
+ */
 const setupActionInputsWithDefaultValues = () => {
   process.env["INPUT_PROJECT-PATH"] = ".";
   process.env["INPUT_HORUSEC-VERSION"] = "latest";
@@ -49,6 +53,9 @@ const setupActionInputsWithDefaultValues = () => {
   process.env["INPUT_ENABLE-SHELLCHECK"] = "false";
 }
 
+/**
+ * Sets the action inputs as env vars with the mocked values
+ */
 const setupActionInputsWithValues = () => {
   process.env["INPUT_PROJECT-PATH"] = "/src";
   process.env["INPUT_RETURN-ERROR"] = "true"
@@ -67,21 +74,9 @@ const setupActionInputsWithValues = () => {
   process.env["INPUT_ENABLE-SHELLCHECK"] = "true";
 }
 
-const deleteStringInputsWithNoDefaultValueFromEnv = () => {
-  delete process.env["INPUT_GITHUB-TOKEN"];
-  delete process.env["INPUT_HORUSEC-VERSION"];
-  delete process.env["INPUT_ANALYSIS-TIMEOUT"];
-  delete process.env["INPUT_LOG-LEVEL"];
-  delete process.env["INPUT_CERTIFICATE-PATH"];
-  delete process.env["INPUT_CONFIG-FILE-PATH"];
-  delete process.env["INPUT_IGNORE-SEVERITY"];
-  delete process.env["INPUT_IGNORE"];
-}
-
 module.exports = {
   getMockedTestFlagsWithValues,
   resetActionInputs,
   setupActionInputsWithDefaultValues,
   setupActionInputsWithValues,
-  deleteStringInputsWithNoDefaultValueFromEnv,
 };

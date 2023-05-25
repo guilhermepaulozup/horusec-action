@@ -1,45 +1,46 @@
-
 const core = require('@actions/core');
-const exec = require('@actions/exec');
+
+
 
 /**
  * Builds a summary table out of json formatted results
  * @param {object} report 
  * @returns {Array[][]}
  */
-const _buildTableFromJson = (report) => {
-  const execFlags = global.EXECUTION_FLAGS;
-  const shouldUseCommitAuthorFlag = execFlags.includes('--enable-commit-author');
-  const headers = [
-    "ID",
-    "Severity",
-    "Line/Column",
-    "File",
-    "Details",
-    "Type",
-    "Rule ID",
-  ];
-
-  if (shouldUseCommitAuthorFlag) {
-    headers.push("Commit Author");
-    headers.push("Commit Date");
-  }
-
-  const rows = [];
+const _buildTableFromJson = (report, onlyCritAndHigh) => {
   const repository = process.env['GITHUB_REPOSITORY'];
   const ref = process.env['GITHUB_REF_NAME'];
+  const shouldUseCommitAuthorFlag = global.EXECUTION_FLAGS.includes('--enable-commit-author');
+  const defaultHeaders = [
+    "Severity",
+    "File",
+    "Line/Column",
+    "Rule ID",
+    "Details",
+    "Vuln ID",
+  ];
+  const rows = [];
+
+  if (shouldUseCommitAuthorFlag) {
+    defaultHeaders.push("Commit Author");
+    defaultHeaders.push("Commit Date");
+  }
+
 
   for (let vulnObject of report.analysisVulnerabilities) {
     const vuln = vulnObject.vulnerabilities;
-    const fileLink = `<a href="https://github.com/${repository}/blob/${ref}/${vuln.file}">${vuln.file}</a>`; 
+    const fileLink = `<a href="https://github.com/${repository}/blob/${ref}/${vuln.file}">${vuln.file}</a>`;
+    if (onlyCritAndHigh) {
+      const isCritOrHigh = (vuln.severity === 'CRITICAL' || vuln.severity === 'HIGH')
+      if (!isCritOrHigh) continue;
+    }
     const newRow = [
-      vuln.vulnerabilityID,
       vuln.severity,
-      `${vuln.line}:${vuln.column}`,
       fileLink,
-      vuln.details,
-      vuln.type,
-      vuln.rule_id
+      `${vuln.line}:${vuln.column}`,
+      vuln.rule_id,
+      `<details><summary>More...</summary>${vuln.details}</details>`,
+      vuln.vulnerabilityID,
     ]
 
     if (shouldUseCommitAuthorFlag) {
@@ -50,33 +51,27 @@ const _buildTableFromJson = (report) => {
     rows.push(newRow);
   }
 
-  return _buildTable(headers, rows);
+  const htmlTable = _buildTable(defaultHeaders, rows);
+
+  return htmlTable;
 }
 
 const _buildTable = (headers, rows) => {
   let table = `<table><tr>`;
-  for (const header of headers) {
-    table += `<th>${header}</th>`
-  }
+
+  for (const header of headers) table += `<th>${header}</th>`
+
   table += "</tr>"
 
   for (const row of rows) {
-    table+= "<tr>";
+    table += "<tr>";
     for (const cell of row) table += `<td>${cell}</td>`;
     table += "</tr>";
   }
 
-  table += "</table>"
-  return table;
-}
+  table += "</table>";
 
-const _buildSummaryTable = (scanResults, format) => {
-  switch (format) {
-    case ".json":
-      return _buildTableFromJson(scanResults);
-    default:
-      return _buildTableFromJson(scanResults);
-  }
+  return table;
 }
 
 const _countSeverities = (vulns) => {
@@ -101,41 +96,43 @@ const _countSeverities = (vulns) => {
 }
 
 /**
- * Checks wether the use-summary is used.
- * @returns {boolean}
- */
-const getSummaryInput = () => {
-  return core.getBooleanInput('use-summary');
-}
-
-/**
  * Builds the action summary with the results of the scan
  * @param {object} - The file and format to build the summary.
- */ 
-const buildSummary = async (content, format='.json') => {
+ */
+const buildSummary = async (content, rowsLimit=50) => {
   core.debug("Building summary table");
   const severities = _countSeverities(content.analysisVulnerabilities);
+  
+  let vulnTableDetails = "List of vulnerabilities found by Horusec.";
+  let onlyCritAndHigh = false;
+  if (rowsLimit < content.analysisVulnerabilities.length) {
+    core.debug(`Findings number is over the maximum number of rows (${rowsLimit}) will only print the CRIT and HIGH ones.`);
+    onlyCritAndHigh = true;
+    vulnTableDetails = `List of CRIT and HIGH vulnerabilities found by Horusec.`;
+  }
+  
+  const vulnTable = _buildTableFromJson(content, onlyCritAndHigh);
   core.summary
-    .addHeading("&#128737; Horusec Results &#128737;")
-    .addRaw(`<h3>Summary results</h3>
-    <span title="Critical" style="color:red">C</span>: ${severities.CRITICAL}
-    <span title="High" style="color:orange">H</span>: ${severities.HIGH} 
-    <span title="Medium" style="color:yellow">M</span>: ${severities.MEDIUM} 
-    <span title="Low" style="color:green">L</span>: ${severities.LOW} 
-    <span title="Info" style="color:blue">I</span>: ${severities.INFO} 
-    <span title="Unknown" style="color:red">U</span>: ${severities.UNKNOWN}`)
+    .addHeading("Horusec")
+    .addRaw(`<h3>Results Summary</h3>
+<span title="Critical" style="color:red">C</span>: ${severities.CRITICAL}
+<span title="High" style="color:orange">H</span>: ${severities.HIGH} 
+<span title="Medium" style="color:yellow">M</span>: ${severities.MEDIUM} 
+<span title="Low" style="color:green">L</span>: ${severities.LOW} 
+<span title="Info" style="color:blue">I</span>: ${severities.INFO} 
+<span title="Unknown" style="color:red">U</span>: ${severities.UNKNOWN}`)
     .addBreak()
     .addDetails("Execution details.",
-`<ul><li><strong>Scan ID</strong>: ${content.id}</li>
+      `<ul><li><strong>Scan ID</strong>: ${content.id}</li>
 <li><strong>Horusec Version</strong>: ${content.version}</li>
 <li><strong>Status</strong>: ${content.status}</li>
 <li><strong>Errors</strong>: ${content.errors}</li></ul>`)
     .addBreak()
     .addDetails(
-        "List of vulnerabilities found by Horusec.",
-        _buildSummaryTable(content, format)
+      vulnTableDetails,
+      vulnTable,
     )
-    await core.summary.write();
+  await core.summary.write();
 }
 
-module.exports = { getSummaryInput, buildSummary }
+module.exports = { buildSummary }

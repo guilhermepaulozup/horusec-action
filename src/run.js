@@ -20,30 +20,31 @@ async function run() {
   core.debug("Horusec execution start.");
   // sets global.EXECUTION_FLAGS
   global.EXECUTION_FLAGS = getFlags();
-
-  const useSummary = getSummaryInput();
+  // gets the use-summary input value.
+  const useSummary = core.getBooleanInput('use-summary');
   if (useSummary) {
-    global.EXECUTION_FLAGS.push(...["-o", "json", "-O", "horusec-report.json"]);
+    global.EXECUTION_FLAGS.push(...["-o", "json", "-O", "horusec-report.json", "--log-level", "panic"]);
   }
 
   try {
     const output = await exec.getExecOutput(horusecStart, global.EXECUTION_FLAGS);
     core.debug("Horusec execution end.");
-    
-    if (useSummary) {
-      core.debug("Building results summary.");
-      const reader = new ReportReader("horusec-report.json");
-      buildSummary(reader.getContent(), "json");
-    }
-    const returnError = core.getBooleanInput('return-error');
-    if (returnError) {
-      if (!output.stdout.includes("YOUR ANALYSIS HAD FINISHED WITHOUT ANY VULNERABILITY!")) {
-        core.setFailed("analysis finished with blocking vulnerabilities");
-      }
-    }
-
   } catch (err) {
     core.setFailed(err.message);
+  }
+
+  if (useSummary) {
+    core.debug("Building results summary.");
+    const reader = new ReportReader("horusec-report.json");
+    buildSummary(reader.getContent(), "json");
+  }
+  
+  // gets the return-error input value.
+  const returnError = core.getBooleanInput('return-error');
+  if (returnError) {
+    if (!output.stdout.includes("YOUR ANALYSIS HAD FINISHED WITHOUT ANY VULNERABILITY!")) {
+      core.setFailed("analysis finished with blocking vulnerabilities");
+    }
   }
 }
 
