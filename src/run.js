@@ -29,23 +29,25 @@ async function run() {
   try {
     const output = await exec.getExecOutput(horusecStart, global.EXECUTION_FLAGS);
     core.debug("Horusec execution end.");
+
+    if (useSummary) {
+      core.debug("Building results summary.");
+      const reader = new ReportReader("horusec-report.json");
+      buildSummary(reader.getContent(), "json");
+    }
+    
+    // gets the return-error input value.
+    const returnError = core.getBooleanInput('return-error');
+    if (returnError) {
+      if (!output.stdout.includes("YOUR ANALYSIS HAD FINISHED WITHOUT ANY VULNERABILITY!")) {
+        core.setFailed("analysis finished with blocking vulnerabilities");
+      }
+    }
+    
   } catch (err) {
     core.setFailed(err.message);
   }
 
-  if (useSummary) {
-    core.debug("Building results summary.");
-    const reader = new ReportReader("horusec-report.json");
-    buildSummary(reader.getContent(), "json");
-  }
-  
-  // gets the return-error input value.
-  const returnError = core.getBooleanInput('return-error');
-  if (returnError) {
-    if (!output.stdout.includes("YOUR ANALYSIS HAD FINISHED WITHOUT ANY VULNERABILITY!")) {
-      core.setFailed("analysis finished with blocking vulnerabilities");
-    }
-  }
 }
 
 run();
