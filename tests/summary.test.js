@@ -9,6 +9,8 @@ const TEST_SUMMARY_FILE = 'tests/assets/SUMMARY.md';
 beforeAll(() => {
   process.env['GITHUB_STEP_SUMMARY'] = TEST_SUMMARY_FILE;
   process.env['SUMMARY_ENV_VAR'] = '';
+  process.env['GITHUB_REPOSITORY'] = 'test-owner/test-repo';
+  process.env['GITHUB_REF_NAME'] = 'test-ref'
 });
 
 beforeEach(() => {
@@ -16,6 +18,7 @@ beforeEach(() => {
   global.EXECUTION_FLAGS = [];
 });
 
+// clears tests/assets/SUMMARY.md content after each test.
 afterEach(async () => {
   await clearTestSummaryContent();
 });

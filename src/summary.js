@@ -1,16 +1,17 @@
 const core = require('@actions/core');
 
-
-
 /**
  * Builds a summary table out of json formatted results
- * @param {object} report 
- * @returns {Array[][]}
+ * @param {object} report The horusec scan report as .json
+ * @param {boolean} onlyCritAndHigh If it should filter off severities < HIGH.
+ * @returns {string} HTML formatted table to be used by the summary.
  */
 const _buildTableFromJson = (report, onlyCritAndHigh) => {
+  // gets the actual action execution Repository name and Reference.
   const repository = process.env['GITHUB_REPOSITORY'];
   const ref = process.env['GITHUB_REF_NAME'];
   const shouldUseCommitAuthorFlag = global.EXECUTION_FLAGS.includes('--enable-commit-author');
+  // the Default headers to be printed.
   const defaultHeaders = [
     "Severity",
     "File",
@@ -19,30 +20,39 @@ const _buildTableFromJson = (report, onlyCritAndHigh) => {
     "Details",
     "Vuln ID",
   ];
+
   const rows = [];
 
   if (shouldUseCommitAuthorFlag) {
     defaultHeaders.push("Commit Author");
     defaultHeaders.push("Commit Date");
   }
-
-
+  // adds an link of the correct file to the file field.
+  const link = `<a href="https://github.com/${repository}/blob/${ref}/`;
+  
   for (let vulnObject of report.analysisVulnerabilities) {
     const vuln = vulnObject.vulnerabilities;
-    const fileLink = `<a href="https://github.com/${repository}/blob/${ref}/${vuln.file}">${vuln.file}</a>`;
+    let fileLink = link;
+    fileLink += `${vuln.file}">${vuln.file}</a>`;
+    // if repository or ref is undefined, use only the vuln file for field.
+    if (!repository || !ref) link = vuln.file;
+    // if onlyCritAndHigh filter is true, skip adding the MEDIUM, LOW, INFO, UNKNOWN findings.
     if (onlyCritAndHigh) {
       const isCritOrHigh = (vuln.severity === 'CRITICAL' || vuln.severity === 'HIGH')
       if (!isCritOrHigh) continue;
     }
+
     const newRow = [
       vuln.severity,
       fileLink,
       `${vuln.line}:${vuln.column}`,
       vuln.rule_id,
+      // builds an collapsed element for vuln details
       `<details><summary>More...</summary>${vuln.details}</details>`,
       vuln.vulnerabilityID,
     ]
 
+    // if shouldUseCommitAuthorFlag is true, push the author email and commit date.
     if (shouldUseCommitAuthorFlag) {
       newRow.push(vuln.commitEmail);
       newRow.push(vuln.commitDate);
@@ -56,6 +66,12 @@ const _buildTableFromJson = (report, onlyCritAndHigh) => {
   return htmlTable;
 }
 
+/**
+ * Builds the HTML formatted table.
+ * @param {[]} headers Table headers
+ * @param {[]} rows Table rows
+ * @returns {string} HTML formatted table with headers and rows.
+ */
 const _buildTable = (headers, rows) => {
   let table = `<table><tr>`;
 
@@ -74,6 +90,11 @@ const _buildTable = (headers, rows) => {
   return table;
 }
 
+/**
+ * Counts the number of severities found in scan.
+ * @param {object[]} vulns The analysisVulnerabilities field in horusec report .json
+ * @returns 
+ */
 const _countSeverities = (vulns) => {
   const sev = {
     CRITICAL: 0,
