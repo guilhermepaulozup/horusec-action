@@ -17,7 +17,7 @@ inputs:
   return-error:
     description: Breaks the pipeline case vulnerabilities are found. Works different from cli return-error.
     required: false
-    default: false
+    default: true
 
   # Horusec CLI inputs.
 

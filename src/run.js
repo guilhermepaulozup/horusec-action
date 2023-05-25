@@ -15,7 +15,7 @@ async function run() {
   const version = core.getInput("horusec-version");
   core.info(`INFO: Required horusec version: ${version}.`);
   // downloads the horusec binary.
-  const executable = await download(version);
+  const horusecStart = await download(version);
   // adds needed project-path to the execution flag.
   core.debug("Horusec execution start.");
   // sets global.EXECUTION_FLAGS
@@ -27,7 +27,7 @@ async function run() {
   }
 
   try {
-    const output = await exec.getExecOutput(executable, global.EXECUTION_FLAGS);
+    const output = await exec.getExecOutput(horusecStart, global.EXECUTION_FLAGS);
     core.debug("Horusec execution end.");
     
     if (useSummary) {
@@ -37,7 +37,7 @@ async function run() {
     }
     const returnError = core.getBooleanInput('return-error');
     if (returnError) {
-      if (!output.includes("YOUR ANALYSIS HAD FINISHED WITHOUT ANY VULNERABILITY!")) {
+      if (!output.stdout.includes("YOUR ANALYSIS HAD FINISHED WITHOUT ANY VULNERABILITY!")) {
         core.setFailed("analysis finished with blocking vulnerabilities");
       }
     }
