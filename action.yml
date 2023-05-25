@@ -6,14 +6,16 @@ inputs:
   github-token:
     description: The github token to use when fetching the horusec binary.
     required: false
-    
   horusec-version:
     description: The required Horusec CLI version to use. Default to latest.
     required: false
     default: latest
-
   use-summary:
     description: Print horusec vulnerabilities to summary.
+    required: false
+    default: false
+  return-error:
+    description: Breaks the pipeline case vulnerabilities are found. Works different from cli return-error.
     required: false
     default: false
 

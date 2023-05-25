@@ -19,7 +19,7 @@ test('should not parse boolean flags set to false', () => {
     const flags = getFlags();
     console.log(flags);
     expect(flags).toStrictEqual(expected);
-    expect(flags.length).toBe(19)
+    expect(flags.length).toBe(18)
 });
 
 test('expected flags should be only start, project-path and return error if no flag is informed', () => {

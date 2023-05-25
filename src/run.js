@@ -35,10 +35,13 @@ async function run() {
       const reader = new ReportReader("horusec-report.json");
       buildSummary(reader.getContent(), "json");
     }
-
-    if (output.exitCode === 1) {
-      core.setFailed("analysis finished with blocking vulnerabilities");
+    const returnError = core.getBooleanInput('return-error');
+    if (returnError) {
+      if (!output.includes("YOUR ANALYSIS HAD FINISHED WITHOUT ANY VULNERABILITY!")) {
+        core.setFailed("analysis finished with blocking vulnerabilities");
+      }
     }
+
   } catch (err) {
     core.setFailed(err.message);
   }
