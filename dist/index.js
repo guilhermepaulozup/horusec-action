@@ -13659,7 +13659,7 @@ const core = __nccwpck_require__(2186);
  * @param {object} report 
  * @returns {Array[][]}
  */
-const _buildTableFromJson = (report, rowsLimit) => {
+const _buildTableFromJson = (report, onlyCritAndHigh) => {
   const repository = process.env['GITHUB_REPOSITORY'];
   const ref = process.env['GITHUB_REF_NAME'];
   const shouldUseCommitAuthorFlag = global.EXECUTION_FLAGS.includes('--enable-commit-author');
@@ -13678,11 +13678,6 @@ const _buildTableFromJson = (report, rowsLimit) => {
     defaultHeaders.push("Commit Date");
   }
 
-  let onlyCritAndHigh = false;
-  if (rowsLimit < report.analysisVulnerabilities.length) {
-    core.debug("Too many vulnerabilities, will only print the HIGH and CRITICAL ones");
-    onlyCritAndHigh = true;
-  }
 
   for (let vulnObject of report.analysisVulnerabilities) {
     const vuln = vulnObject.vulnerabilities;
@@ -13691,7 +13686,6 @@ const _buildTableFromJson = (report, rowsLimit) => {
       const isCritOrHigh = (vuln.severity === 'CRITICAL' || vuln.severity === 'HIGH')
       if (!isCritOrHigh) continue;
     }
-
     const newRow = [
       vuln.severity,
       fileLink,
@@ -13760,6 +13754,16 @@ const _countSeverities = (vulns) => {
 const buildSummary = async (content, rowsLimit=50) => {
   core.debug("Building summary table");
   const severities = _countSeverities(content.analysisVulnerabilities);
+  
+  let vulnTableDetails = "List of vulnerabilities found by Horusec.";
+  let onlyCritAndHigh = false;
+  if (rowsLimit < content.analysisVulnerabilities.length) {
+    core.debug(`Findings number is over the maximum number of rows (${rowsLimit}) will only print the CRIT and HIGH ones.`);
+    onlyCritAndHigh = true;
+    vulnTableDetails = `List of CRIT and HIGH vulnerabilities found by Horusec.`;
+  }
+  
+  const vulnTable = _buildTableFromJson(content, onlyCritAndHigh);
   core.summary
     .addHeading("Horusec")
     .addRaw(`<h3>Results Summary</h3>
@@ -13777,8 +13781,8 @@ const buildSummary = async (content, rowsLimit=50) => {
 <li><strong>Errors</strong>: ${content.errors}</li></ul>`)
     .addBreak()
     .addDetails(
-      "List of vulnerabilities found by Horusec.",
-      _buildTableFromJson(content, rowsLimit)
+      vulnTableDetails,
+      vulnTable,
     )
   await core.summary.write();
 }
