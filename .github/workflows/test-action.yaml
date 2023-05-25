@@ -4,14 +4,13 @@ on:
   pull_request: [ 'main' ]
 
 jobs:
-  execute:
+  Horusec:
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Horusec
-        id: horusec
+      - name: Execute
         continue-on-error: true
         uses: ./
         with:
