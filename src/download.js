@@ -10,7 +10,6 @@ const gh = require("@actions/github");
 */
 const findRequiredBinaryUrl = (assets) => {
   let arq = arch;
-  console.log(platform + " _ " + arch);
   if (arq === "x64") arq = 'amd64'; // parses process.arch from x64 to amd64
   const asset = assets
     .find(({ name }) => name.includes(`${platform}_${arq}`));

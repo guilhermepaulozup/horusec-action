@@ -10,39 +10,39 @@ inputs:
     description: The required Horusec CLI version to use. Default to latest.
     required: false
     default: latest
+  return-error:
+    description: Breaks the pipeline case vulnerabilities are found. Works different from cli --return-error.
+    required: false
+    default: true
   use-summary:
     description: Print horusec vulnerabilities to summary.
     required: false
     default: false
-  return-error:
-    description: Breaks the pipeline case vulnerabilities are found. Works different from cli return-error.
-    required: false
-    default: true
 
   # Horusec CLI inputs.
 
   analysis-timeout:
     description: The timeout threshold for the Horusec CLI wait for the analysis to complete. The minimum time is 10 (default to 600 cli).
     required: false
-  log-level:
-    description: Set log level ("panic"|"fatal"|"error"|"warn"|"info"|"debug"|"trace") (default "info")
-    required: false
   certificate-path:
     description: Path to certificate of authority. Example example/ca.crt.
+    required: false
+  config-file-path:
+    description: Horusec config file path. Default to repository root.
+    required: false
+  ignore:
+    description: Paths to ignore in the analysis. Example -i="/path/to/ignore, **/*_test.go, **/assets/**" (default [*tmp*,**/.vscode/**])
+    required: false
+  ignore-severity:
+    description: The level of vulnerabilities to ignore in the output (LOW|MEDIUM|HIGH). Example -s="LOW, HIGH" (default [INFO]).
+    required: false
+  log-level:
+    description: Set log level ("panic"|"fatal"|"error"|"warn"|"info"|"debug"|"trace") (default "info")
     required: false
   project-path:
     description: Path to run an analysis. Default to the repository root.
     required: true
     default: "."
-  config-file-path:
-    description: Horusec config file path. Default to repository root.
-    required: false
-  ignore-severity:
-    description: The level of vulnerabilities to ignore in the output (LOW|MEDIUM|HIGH). Example -s="LOW, HIGH" (default [INFO]).
-    required: false
-  ignore:
-    description: Paths to ignore in the analysis. Example -i="/path/to/ignore, **/*_test.go, **/assets/**" (default [*tmp*,**/.vscode/**])
-    required: false
 
   ### Boolean inputs
   enable-commit-author:

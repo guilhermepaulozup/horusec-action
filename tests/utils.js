@@ -3,7 +3,6 @@ const getMockedTestFlagsWithValues = () => {
   const flags = [
     "start",
     "--project-path", process.env["INPUT_PROJECT-PATH"],
-    // "--return-error",
     "--analysis-timeout", process.env["INPUT_ANALYSIS-TIMEOUT"],
     "--log-level", process.env["INPUT_LOG-LEVEL"],
     "--config-file-path", process.env["INPUT_CONFIG-FILE-PATH"],

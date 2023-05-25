@@ -9,7 +9,7 @@ const exec = require('@actions/exec');
  */
 const _buildTableFromJson = (report) => {
   const execFlags = global.EXECUTION_FLAGS;
-
+  const shouldUseCommitAuthorFlag = execFlags.includes('--enable-commit-author');
   const headers = [
     "ID",
     "Severity",
@@ -20,30 +20,31 @@ const _buildTableFromJson = (report) => {
     "Rule ID",
   ];
 
-  const rows = [headers];
+  if (shouldUseCommitAuthorFlag) {
+    headers.push("Commit Author");
+    headers.push("Commit Date");
+  }
+
+  const rows = [];
   const repository = process.env['GITHUB_REPOSITORY'];
   const ref = process.env['GITHUB_REF_NAME'];
 
-  for (let vuln of report.analysisVulnerabilities) {
-    const v = vuln.vulnerabilities;
-    const fileLink = `<a href="https://github.com/${repository}/blob/${ref}/${v.file}">${v.file}</a>`; 
+  for (let vulnObject of report.analysisVulnerabilities) {
+    const vuln = vulnObject.vulnerabilities;
+    const fileLink = `<a href="https://github.com/${repository}/blob/${ref}/${vuln.file}">${vuln.file}</a>`; 
     const newRow = [
-      v.vulnerabilityID,
-      v.severity,
-      `${v.line}:${v.column}`,
+      vuln.vulnerabilityID,
+      vuln.severity,
+      `${vuln.line}:${vuln.column}`,
       fileLink,
-      v.details,
-      v.type,
-      v.rule_id
+      vuln.details,
+      vuln.type,
+      vuln.rule_id
     ]
 
-    if (execFlags.includes('--enable-commit-author')) {
-    //   rows[0].push({ data: "Commit Author", header: true });
-    //   rows[0].push({ data: "Commit Date", header: true });
-      headers.push("Commit Author");
-      headers.push("Commit Date");
-      newRow.push(v.commitEmail);
-      newRow.push(v.commitDate);
+    if (shouldUseCommitAuthorFlag) {
+      newRow.push(vuln.commitEmail);
+      newRow.push(vuln.commitDate);
     }
 
     rows.push(newRow);
@@ -54,16 +55,14 @@ const _buildTableFromJson = (report) => {
 
 const _buildTable = (headers, rows) => {
   let table = `<table><tr>`;
-  for (const h of headers) {
-    table += `<th>${h}</th>`
+  for (const header of headers) {
+    table += `<th>${header}</th>`
   }
   table += "</tr>"
 
-  for (const r of rows) {
+  for (const row of rows) {
     table+= "<tr>";
-    for (const v of r) {
-      table += `<td>${v}</td>`;
-    }
+    for (const cell of row) table += `<td>${cell}</td>`;
     table += "</tr>";
   }
 
@@ -112,8 +111,8 @@ const getSummaryInput = () => {
 /**
  * Builds the action summary with the results of the scan
  * @param {object} - The file and format to build the summary.
- */
-const buildSummary = async (content, format='json') => {
+ */ 
+const buildSummary = async (content, format='.json') => {
   core.debug("Building summary table");
   const severities = _countSeverities(content.analysisVulnerabilities);
   core.summary

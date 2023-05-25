@@ -1,10 +1,9 @@
 # horusec-action
 GitHub action for running [Horusec](https://github.com/ZupIT/horusec) Cli in repository.
 
-
 ## Usage
 
-Just follow the example below:
+Copy the example below, it should be 
 
 ```yaml
       - name: Horusec
@@ -13,7 +12,7 @@ Just follow the example below:
           github-token: ${{github.token}}
 ```
 
-Obs: The ```${{github.token}}``` is only used to fetch the correct cli **binary** version based on ```hoursec-version``` input.
+Obs: The ```${{github.token}}``` is only used to fetch the correct cli **binary** version based on ```horusec-version``` input.
 
 ## Inputs
 
@@ -23,5 +22,10 @@ There some extra commands:
 
 | Inputs | Example | Desc |
 |--------|---------|------|
+| horusec-version | v2.8.0 | The binary version to use in the execution (based on release tag name), defaults to latest release. |
 | github-token | ${{ github.token }} | The inner container github token to be used to fetch horusec cli binary. | 
-| horusec-version | v2.8.0 | The binary version to use in the execution, defaults to latest release.
+| return-error | true | If the action should return an error to the workflow. (Obs: Although horusec cli have a --return-error flag, this input does not use this flag.) |
+| use-summary | true | If the results should be printed to action summary (only crits and high are printed). Limits to 50 rows. |
+<!-- | use-issues | true | Generate an new issue on the repo with the vulnerabilities found. | -->
+<!-- | export-artifact | true | If an action artifact should be created with the results of the scan. | -->
+
